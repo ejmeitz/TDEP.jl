@@ -1,6 +1,12 @@
 # TDEP.jl
 Temperature Dependent Effective Potential Bindings in Julia
 
+To install this package (and TDEP!) run in the Julia REPL:
+```
+using Pkg
+Pkg.add(url = "https://github.com/ejmeitz/TDEP.jl.git")
+```
+
 This project is still under development. At the moment only the `extract_forceconstants` command is verified to work. More to come soon!
 
 ```julia
