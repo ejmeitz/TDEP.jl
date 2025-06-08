@@ -1,0 +1,12 @@
+name = "TDEP"
+uuid = "03dde086-6832-4aef-a599-2e26e563d57c"
+authors = ["ejmeitz <emeitz@andrew.cmu.edu>"]
+version = "0.0.1"
+
+[deps]
+MPI = "da04e1cc-30fd-572f-bb4f-1f8673147195"
+TDEP_jll = "1616d667-7f4b-50a1-9dcc-173d58025fb3"
+
+[compat]
+TDEP_jll = "25.3.0"
+julia = "1.6"
