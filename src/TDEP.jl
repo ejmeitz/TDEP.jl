@@ -4,6 +4,8 @@ using TDEP_jll
 
 const DefaultFloat = Float64
 
-include("cmds.jl")
+for file in readdir(@__DIR__, "cmds")
+    include(joinpath("./cmds", file))
+end
 
 end
