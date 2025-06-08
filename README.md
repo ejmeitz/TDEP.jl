@@ -25,4 +25,4 @@ TO-DO:
 - Support local builds of TDEP/MPI
 - Integrate with [AtomsBase.jl](https://github.com/JuliaMolSim/AtomsBase.jl) ecosystem
 - Possible integrations with [Brillouin.jl](https://github.com/thchr/Brillouin.jl) or [Spglib.jl](https://github.com/singularitti/Spglib.jl) or [SimpleCrystals.jl](https://github.com/ejmeitz/SimpleCrystals.jl)
-- Do something cool with libolle
+- Do something cool with libolle (implement sTDEP loop etc.)
