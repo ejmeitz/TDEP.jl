@@ -20,7 +20,7 @@ execute(efc, rundir)
 TO-DO:
 --------
 - Support MPI!!!
-- Re-implment checks for required folders to get better errors
+- Re-implment checks for required input files to get useful errors without opening logfile
 - Finish wrapping all executables
 - Support local builds of TDEP/MPI
 - Integrate with [AtomsBase.jl](https://github.com/JuliaMolSim/AtomsBase.jl) ecosystem
