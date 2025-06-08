@@ -1,4 +1,4 @@
-export ExtractForceConstants, CanonicalConfiguration
+export execute, ExtractForceConstants, CanonicalConfiguration
 
 abstract type TDEP_Command{T<:Real} end
 
@@ -9,10 +9,10 @@ Base.@kwdef struct ExtractForceConstants{T} <: TDEP_Command{T}
     polar::Bool = false
     stride::Int = 1
     firstorder::Bool = false
-    temperature::T - 1.0
+    temperature::T = -1.0
     norotational::Bool = false
     nohuang::Bool = false
-    nohermetian::Bool = false
+    nohermitian::Bool = false
     potential_energy_differences::Bool = true
 end
 
@@ -63,12 +63,12 @@ end
 
 function build_args(cmd::TDEP_Command)
     T = typeof(cmd)
-    args = ""
-    for (arg, arg_T) in zip(fieldnames(T), T.types)
-        if arg_T isa Bool
-            args *= "--$(arg) "
-        else
-            args *= "--$(arg) $(getproperty(cmd, arg)) "
+    args = []
+    for (arg, arg_type) in zip(fieldnames(T), T.types)
+        if arg_type != Bool # if not a flag
+            push!(args, "--$(arg)", "$(getproperty(cmd, arg))")
+	elseif getproperty(cmd, arg) == true # only push flag if set to true
+	    push!(args, "--$(arg)")
         end
     end
 
@@ -76,15 +76,18 @@ function build_args(cmd::TDEP_Command)
 end
 
 #* TODO ADD MPI SUPPORT
-function run(cmd::TDEP_Command, rundir::String = pwd())
+function execute(cmd::TDEP_Command, rundir::String = pwd())
 
     cmd_str = cmd_name(cmd)
+    args = build_args(cmd)
     log_file = cmd_str * ".log"
     f = str_to_fn(cmd)
 
     cd(rundir) do
-        run(`$(f()) $(cmd.args) > $(log_file)`)
+	shell_cmd = `$(f()) $(args)`
+        run(pipeline(shell_cmd; stdout = log_file))
     end
-
+    
     return nothing
+
 end
