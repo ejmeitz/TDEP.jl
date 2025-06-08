@@ -23,4 +23,6 @@ TO-DO:
 - Re-implment checks for required folders to get better errors
 - Finish wrapping all executables
 - Support local builds of TDEP/MPI
+- Integrate with [AtomsBase.jl](https://github.com/JuliaMolSim/AtomsBase.jl) ecosystem
+- Possible integrations with [Brillouin.jl](https://github.com/thchr/Brillouin.jl) or [Spglib.jl](https://github.com/singularitti/Spglib.jl) or [SimpleCrystals.jl](https://github.com/ejmeitz/SimpleCrystals.jl)
 - Do something cool with libolle
