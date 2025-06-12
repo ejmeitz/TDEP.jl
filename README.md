@@ -1,13 +1,14 @@
 # TDEP.jl
 Temperature Dependent Effective Potential Bindings in Julia
+> :warning: **This project is still under development** More to come soon!
 
+----------------------------------------------
 To install this package (and TDEP!) run in the Julia REPL:
 ```julia
 using Pkg
 Pkg.add(url = "https://github.com/ejmeitz/TDEP.jl.git")
 ```
 
-This project is still under development. At the moment only the `extract_forceconstants` command is verified to work. More to come soon!
 ```julia
 using TDEP
 
@@ -16,10 +17,15 @@ rundir = "/home/emeitz/tests/TDEP/tdep_jl"
 execute(efc, rundir)
 ```
 
+MPI is also supported. Unless otherwise specified, a comptabile MPI is automaticalled downloaded. To use it simply specify the number of cores when calling `execute`
+```julia
+ncores = 10
+execute(efc, rundir, ncores)
+```
+It is possible to use a local MPI and/or a locally built TDEP. I will write docs on how to do that soon!
 
 TO-DO:
 --------
-- Support MPI!!!
 - Re-implment checks for required input files to get useful errors without opening logfile
 - Finish wrapping all executables
 - Support local builds of TDEP/MPI
