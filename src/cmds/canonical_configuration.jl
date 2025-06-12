@@ -34,4 +34,4 @@ Base.@kwdef struct CanonicalConfiguration{T} <: TDEP_Command{T}
     maximum_frequency::T = -1.0
 end
 
-cmd_name(::AnharmonicFreeEnergy) = "canonical_configuration"
+cmd_name(::CanonicalConfiguration) = "canonical_configuration"
