@@ -64,3 +64,15 @@ Base.@kwdef struct ThermalConductivity{T} <: TDEP_Command{T}
 end
 
 cmd_name(::ThermalConductivity) = "thermal_conductivity"
+
+function required_files(tc::ThermalConductivity)
+    required_files = ["infile.ucposcar", "infile.forceconstant", "infile.forceconstant_thirdorder"]
+
+    if tc.fourthorder
+        required_files = [required_files; "infile.forceconstant_fourthorder"]
+    end
+
+    if tc.readiso
+        required_files = [required_files; "infile.isotopes"]
+    end
+end
