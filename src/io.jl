@@ -62,6 +62,10 @@ function poscar_symbol_block(symbols::AbstractVector{T}) where T
     return symbol_line, count_line
 end
 
+function to_frac_coords(cell::AbstractMatrix{L}, position::AbstractVector{L}) where L
+    return mod.(cell \ position, L(1.0))
+end
+
 
 function write_ssposcar(outdir::String, cell_vectors::AbstractMatrix{L},
                          positions::AbstractVector{<:AbstractVector{L}}, 
@@ -80,7 +84,7 @@ function write_ssposcar(outdir::String, cell_vectors::AbstractMatrix{L},
     
     # If there are units, convert to Angstroms
     # and then strip the units
-    if units(L) != NoUnits
+    if unit(L) != NoUnits
         cell_vectors = ustrip.(u"Å", cell_vectors)
         positions = [ustrip.(u"Å", p) for p in positions]
     else
@@ -89,7 +93,7 @@ function write_ssposcar(outdir::String, cell_vectors::AbstractMatrix{L},
 
     frac = Vector{Vector{Float64}}(undef, length(positions))
     for i in eachindex(positions)
-        frac[i] = mod.(cell \ positions[i], 1.0)
+        frac[i] = to_frac_coords(cell_vectors, positions[i])
     end
 
     symbol_line, count_line = poscar_symbol_block(atomic_symbols)
@@ -97,15 +101,15 @@ function write_ssposcar(outdir::String, cell_vectors::AbstractMatrix{L},
     open(outpath, "w") do f
         # Write header
         println(f, "SSPOSCAR")
-        @printf f "%.10f" 1.0
-        @printf f "%.10f %.10f %.10f" cell_vectors[1,:]...
-        @printf f "%.10f %.10f %.10f" cell_vectors[2,:]...
-        @printf f "%.10f %.10f %.10f" cell_vectors[3,:]...
+        @printf f "%.10f\n" 1.0
+        @printf f "%.10f %.10f %.10f\n" cell_vectors[1,:]...
+        @printf f "%.10f %.10f %.10f\n" cell_vectors[2,:]...
+        @printf f "%.10f %.10f %.10f\n" cell_vectors[3,:]...
         println(f, symbol_line)
         println(f, count_line)
         println(f, "Direct coordinates")
         for i in eachindex(frac)
-            @printf f "%.15f %.15f %.15f" frac[i]...
+            @printf f "%.15f %.15f %.15f\n" frac[i]...
         end
     end
 end

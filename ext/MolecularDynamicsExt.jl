@@ -29,7 +29,7 @@ function TDEP.generate_MDTDEP_dataset(sys::System{3}, sim, n_steps_warmup::Integ
         @warn "Found $(length(sys.loggers)) loggers, removing from system"
     end
 
-    if typeof(sim) <: Langevin
+    if !(typeof(sim) <: Langevin)
         #* MAKE ERROR()
         @error "Simulator must be Langevin. If Molly has a new NVT simulator, open a PR."
     end
@@ -39,6 +39,7 @@ function TDEP.generate_MDTDEP_dataset(sys::System{3}, sim, n_steps_warmup::Integ
         @warn "You are not removing COM motion. You should probably set remove_CM_motion in the Langevin simulator."
     end
 
+    #* HOW TO HANDLE MASSES
     length_units = u"Å"
     energy_units =  u"eV"
     force_units = energy_units / length_units
@@ -56,6 +57,10 @@ function TDEP.generate_MDTDEP_dataset(sys::System{3}, sim, n_steps_warmup::Integ
         temps = TemperatureLogger(TT, sample_every)
     )
 
+    println(new_loggers.pe)
+    println(new_loggers.ke)
+
+
     #* TODO CHECK THIS IS RIGHT MATH, Off by 1?
     n_samples = n_seeds * div(n_steps, sample_every)
     dt_fs = unit(sim.dt) == Unitful.NoUnits ? sim.dt : uconvert(u"fs", sim.dt)
@@ -67,7 +72,7 @@ function TDEP.generate_MDTDEP_dataset(sys::System{3}, sim, n_steps_warmup::Integ
     # Write ssposcar before we do dynamics
     cv = hcat(Molly.cell_vectors(sys)...) # matrix with vec as cols
     write_ssposcar(outdir, cv, sys.coords, Molly.atomic_symbol(sys))
-    write_meta(temperature, n_samples, dt_fs, n_atoms)
+    write_meta(outdir, ustrip(sim.temperature), n_samples, dt_fs, n_atoms)
 
     for s in 1:n_seeds
         
@@ -75,37 +80,43 @@ function TDEP.generate_MDTDEP_dataset(sys::System{3}, sim, n_steps_warmup::Integ
 
         new_system = System(
             sys;
-            loggers = copy(new_loggers),
+            loggers = deepcopy(new_loggers),
             force_units = u"eV * Å^-1",
-            energy_units = u"eV"
+            energy_units = u"eV",
+            k = Molly.default_k(energy_units)
         )
     
         random_velocities!(new_system, sim.temperature)
 
-        simulate!(sys, sim, n_steps_warmup; run_loggers=false)
-        simulate!(sys, sim, n_steps)
+        simulate!(new_system, sim, n_steps_warmup; run_loggers=false)
+        simulate!(new_system, sim, n_steps)
 
         @info "Seed $s complete. Writing to disk."
 
         open(posns_file, "a") do pf
-            c = values(sys.loggers.coords)
-            for i in eachindex(c)
-                @printf pf "%.15f %.15f %.15f" ustrip.(c[i])...
+            all_coords = values(new_system.loggers.coords)
+            for timestep in eachindex(all_coords)
+                for coord in all_coords[timestep]
+                    x_frac = ustrip.(TDEP.to_frac_coords(cv, coord)) #* fix units here
+                    @printf pf "%.15f %.15f %.15f\n" x_frac...
+                end
             end
         end
 
         open(forces_file, "a") do ff
-            f = values(sys.loggers.forces)
-            for i in eachindex(c)
-                @printf ff "%.15f %.15f %.15f" ustrip.(f[i])...
+            all_forces = values(new_system.loggers.forces)
+            for timestep in eachindex(all_forces)
+                for force in all_forces[timestep]
+                    @printf ff "%.15f %.15f %.15f\n" ustrip.(force)...
+                end
             end
         end
 
         write_partial_stat(
             outdir, 
-            values(sys.loggers.pe),
-            values(sys.loggers.ke),
-            values(sys.loggers.temps);
+            values(new_system.loggers.pe),
+            values(new_system.loggers.ke),
+            values(new_system.loggers.temps);
             sampled_every = sample_every,
             dt_fs = dt_fs, 
             file_mode = "a"
