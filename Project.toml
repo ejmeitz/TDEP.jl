@@ -8,6 +8,7 @@ DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 MPI = "da04e1cc-30fd-572f-bb4f-1f8673147195"
 Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 TDEP_jll = "1616d667-7f4b-50a1-9dcc-173d58025fb3"
+Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 
 [weakdeps]
 Molly = "aa0f7f06-fcc0-5ec4-a7f3-a573f33f9c4c"
@@ -21,4 +22,5 @@ MPI = "0.20.22"
 Molly = "0.22"
 Printf = "1.11.0"
 TDEP_jll = "25.3.0"
+Unitful = "1.23.1"
 julia = "1.6"

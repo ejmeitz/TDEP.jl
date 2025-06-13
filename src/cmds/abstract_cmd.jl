@@ -37,7 +37,7 @@ function build_cmd(tdep_cmd::Cmd, tdep_args)
     return `$(tdep_cmd) $(tdep_args)`
 end
 
-"""
+@doc raw"""
 When using an `ExecutableProduct` from a JLL the standard way to get the right environment is
 to invoke the automatically generated wrapper. See the docs [here](https://docs.binarybuilder.org/stable/jll/#ExecutableProduct).
 

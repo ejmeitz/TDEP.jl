@@ -1,4 +1,4 @@
-export write_meta
+export write_meta, write_partial_stat, write_ssposcar
 
 function write_meta(outdir::String, temperature, n_samples, dt_fs, n_atoms)
 
@@ -68,6 +68,9 @@ function write_ssposcar(outdir::String, cell_vectors::AbstractMatrix{L},
                          atomic_symbols) where L
 
     @assert length(positions) == length(atomic_symbols) "Cannot write ssposcar with mismatched lengths"
+
+    # Molly hard-codes unknown if can't parse symbol
+    @assert isnothing(findfirst(x -> x == :unknown, atomic_symbols)) "Cannot make ssposcar with unknown symbols."
 
     outpath = joinpath(outdir, "infile.ssposcar")
     
