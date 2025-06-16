@@ -30,8 +30,7 @@ function TDEP.generate_MDTDEP_dataset(sys::System{3}, sim, n_steps_warmup::Integ
     end
 
     if !(typeof(sim) <: Langevin)
-        #* MAKE ERROR()
-        @error "Simulator must be Langevin. If Molly has a new NVT simulator, open a PR."
+        error("Simulator must be Langevin. If Molly has a new NVT simulator, open a PR.")
     end
 
     # By default this is 1, just to be safe check its on
@@ -57,17 +56,16 @@ function TDEP.generate_MDTDEP_dataset(sys::System{3}, sim, n_steps_warmup::Integ
         temps = TemperatureLogger(TT, sample_every)
     )
 
-    println(new_loggers.pe)
-    println(new_loggers.ke)
-
-
-    #* TODO CHECK THIS IS RIGHT MATH, Off by 1?
-    n_samples = n_seeds * div(n_steps, sample_every)
+    n_samples = n_seeds * (div(n_steps, sample_every) + 1)
     dt_fs = unit(sim.dt) == Unitful.NoUnits ? sim.dt : uconvert(u"fs", sim.dt)
     n_atoms = length(sys)
     
     posns_file = joinpath(outdir, "infile.positions")
     forces_file = joinpath(outdir, "infile.forces")
+    stat_file = joinpath(outdir, "infile.stat")
+    isfile(posns_file) && rm(posns_file); @warn "Removed existing infile.positions"
+    isfile(forces_file) && rm(forces_file); @warn "Removed existing infile.forces"
+    isfile(stat_file) && rm(stat_file); @warn "Removing existing infile.stat"
 
     # Write ssposcar before we do dynamics
     cv = hcat(Molly.cell_vectors(sys)...) # matrix with vec as cols
@@ -79,7 +77,7 @@ function TDEP.generate_MDTDEP_dataset(sys::System{3}, sim, n_steps_warmup::Integ
         @info "Starting seed $s"
 
         new_system = System(
-            sys;
+            deepcopy(sys);
             loggers = deepcopy(new_loggers),
             force_units = u"eV * Å^-1",
             energy_units = u"eV",
@@ -97,7 +95,7 @@ function TDEP.generate_MDTDEP_dataset(sys::System{3}, sim, n_steps_warmup::Integ
             all_coords = values(new_system.loggers.coords)
             for timestep in eachindex(all_coords)
                 for coord in all_coords[timestep]
-                    x_frac = ustrip.(TDEP.to_frac_coords(cv, coord)) #* fix units here
+                    x_frac = TDEP.to_frac_coords(ustrip.(cv), ustrip.(coord))
                     @printf pf "%.15f %.15f %.15f\n" x_frac...
                 end
             end

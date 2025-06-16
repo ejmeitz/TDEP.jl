@@ -11,8 +11,8 @@ function write_meta(outdir::String, temperature, n_samples, dt_fs, n_atoms)
     open(outpath, "w") do f
         println(f, "$(n_atoms) # Number of atoms")
         println(f, "$(n_samples) # Number of samples")
-        println(f, "$(dt_fs) # Timestep in fs")
-        println(f, "$(temperature) # Temperature in K")
+        println(f, "$(ustrip(dt_fs)) # Timestep in fs")
+        println(f, "$(ustrip(temperature)) # Temperature in K")
     end
     
 end
@@ -26,7 +26,7 @@ function write_partial_stat(outdir::String, PE::AbstractVector,
 
     outpath = joinpath(outdir, "infile.stat")
 
-    if isfile(outpath)
+    if isfile(outpath) && file_mode == "w"
         @warn "Overwriting existing infile.stat at $(outpath)"
     end
 
@@ -36,12 +36,15 @@ function write_partial_stat(outdir::String, PE::AbstractVector,
     @assert N == length(T) "Cannot make infile.stat from vectors of different length"
 
     TE = PE .+ KE
-    steps = sampled_every .* collect(1:N)
-    timesteps = steps .* dt_fs
-    tmp = rand(N)
+    steps = Int.(sampled_every .* collect(1:N))
+    timesteps = Int.(steps .* ustrip(dt_fs))
+
+    tmp = rand(7)
 
     open(outpath, file_mode) do f
-        writedlm(f, [steps timesteps TE PE KE T tmp tmp tmp tmp tmp tmp tmp], " ")
+        for i in 1:N
+            @printf f "%d %d %.10f %.10f %.10f %.10f %.10f %.10f %.10f %.10f %.10f %.10f %.10f\n" steps[i] timesteps[i] ustrip(TE[i]) ustrip(PE[i]) ustrip(KE[i]) ustrip(T[i]) tmp...
+        end
     end
 
 end
