@@ -24,7 +24,13 @@ function build_args(cmd::TDEP_Command)
     args = []
     for (arg, arg_type) in zip(fieldnames(T), T.types)
         if arg_type != Bool # if not a flag
-            push!(args, "--$(arg)", "$(getproperty(cmd, arg))")
+            if arg_type <: Tuple
+                data = getproperty(cmd, arg)
+                N = length(data)
+                push!(args, "--$(arg)", ["$(data[i])" for i in 1:N]...)
+            else
+                push!(args, "--$(arg)", "$(getproperty(cmd, arg))")
+            end
 	elseif getproperty(cmd, arg) == true # only push flag if set to true
 	    push!(args, "--$(arg)")
         end

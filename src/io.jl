@@ -35,7 +35,7 @@ function write_partial_stat(outdir::String, PE::AbstractVector,
     @assert N == length(KE) "Cannot make infile.stat from vectors of different length"
     @assert N == length(T) "Cannot make infile.stat from vectors of different length"
 
-    TE = PE .+ KE
+    TE = ustrip.(PE) .+ ustrip.(KE)
     steps = Int.(sampled_every .* collect(1:N))
     timesteps = Int.(steps .* ustrip(dt_fs))
 

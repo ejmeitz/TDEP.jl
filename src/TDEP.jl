@@ -2,7 +2,7 @@ module TDEP
 
 using TDEP_jll
 using MPI
-
+using StaticArrays
 using DelimitedFiles
 using ProgressMeter
 using Printf
@@ -14,8 +14,7 @@ using AtomsCalculators
 # Useful for end-user to have access to automatically
 using Reexport 
 @reexport using Unitful
-@reexport using ASEconvert
-@reexport using PythonCall
+
 
 const DefaultFloat = Float64
 
@@ -25,6 +24,7 @@ end
 
 include("io.jl")
 include("stubs.jl")
+include("workflows/sTDEP.jl")
 
 
 end
