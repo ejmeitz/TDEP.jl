@@ -1,9 +1,3 @@
-module MolecularDynamicsExt
-
-using TDEP
-using Molly
-using Unitful
-using Printf
 
 """
 Runs a molecular dynamics simulation with [Molly.jl](https://github.com/JuliaMolSim/Molly.jl) given a Molly `System` object. This system could
@@ -121,22 +115,5 @@ function TDEP.generate_MDTDEP_dataset(sys::System{3}, sim, n_steps_warmup::Integ
         )
 
     end
-
-end
-
-function generate_STDEP_dataset(sys::System{3}, n_samples::Integer)
-    # calls single_point_forces a bunch
-end
-
-function single_point_forces(sys::System{3})
-    # for s-TDEP
-end
-
-# Generates configurations to seed MD simulations
-function generate_initial_configurations(sys::System{3}, temperature, n_seeds::Integer)
-    # Run canonical_configurations to sample phase space
-    cc = CanonicalConfiguration(temperature = temperature, nconf = n_seeds)
-end
-
 
 end
