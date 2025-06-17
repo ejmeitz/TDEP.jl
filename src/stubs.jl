@@ -1,4 +1,4 @@
-export generate_MDTDEP_dataset, sTDEP
+export generate_MDTDEP_dataset
 
 
 # This file contains function handles which are implemented
@@ -7,7 +7,3 @@ export generate_MDTDEP_dataset, sTDEP
 # users may want to download.
 
 function generate_MDTDEP_dataset end
-
-function sTDEP end
-
-function single_point_forces end

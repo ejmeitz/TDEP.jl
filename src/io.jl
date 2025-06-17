@@ -69,7 +69,6 @@ function to_frac_coords(cell::AbstractMatrix{L}, position::AbstractVector{L}) wh
     return mod.(cell \ position, L(1.0))
 end
 
-
 function write_ssposcar(outdir::String, cell_vectors::AbstractMatrix{L},
                          positions::AbstractVector{<:AbstractVector{L}}, 
                          atomic_symbols) where L
@@ -115,4 +114,35 @@ function write_ssposcar(outdir::String, cell_vectors::AbstractMatrix{L},
             @printf f "%.15f %.15f %.15f\n" frac[i]...
         end
     end
+end
+
+# Just reads the positions from POSCAR
+function read_poscar_positions(path, natoms; cart = true)
+
+    parse_line = (line) -> parse.(Float64, split(strip(line))[1:3])
+
+    positions = SVector{3, Float64}[]
+
+    open(path, "r") do f
+        readline(f)
+        scale = parse(Float64, readline(f))
+        lv1 = scale .* parse.(Float64, split(strip(readline(f))))
+        lv2 = scale .* parse.(Float64, split(strip(readline(f))))
+        lv3 = scale .* parse.(Float64, split(strip(readline(f))))
+
+        cell_vectors = hcat(lv1, lv2, lv3) # cell vecs as columns
+
+        readline(f) # skip species line
+
+        natoms_file = sum(parse.(Int, split(strip(readline(f)))))
+        @assert natoms_file == natoms "Poscar has $(natoms_file) but you told me it would have $(natoms)"
+        
+        readline(f) # skip "direct coordinates" line
+        for _ in 1:natoms
+            r = parse_line(readline(f))
+            cart && r = cell_vectors * r
+            push!(positions, r)
+        end
+    end
+
 end
