@@ -32,7 +32,7 @@ function sTDEP(
                 maximum_frequency = maximum_frequency
             )
 
-    generate_configs(sys, cc_init, calc, init_dir, ncores, verbose)
+    generate_configs(sys, cc_init, calc, init_dir, verbose)
 
     # Generate remaining configurations with IFCs from prior iteration
     cc = CanonicalConfiguration(
@@ -75,7 +75,40 @@ function generate_configs(sys::AbstractSystem{3}, cc::CanoncaiConfiguration,
 
     execute(cc, outdir, 1, verbose)
 
-    # Parse coordinates into sys object and calculate forces
+    get_filepath = (i) -> joinpath(outdir, "contcar_conf$(lpad(i, 4, '0'))")
 
-    # Generate necessary input files for extract_forceconstants
+    # Parse coordinates into sys object and calculate forces
+    for i in 1:cc.nconf
+        filepath = get_filepath(i)
+        x_frac, cell = read_poscar_positions(filepath, length(sys)) * length_unit(calc)
+
+        # Update positions in system and write to infile.positions
+        open(joinpath(outdir, "infile.positions"), "a") do pf
+            for j in eachindex(new_coords)
+                set_position!(sys, j, cell * x_frac[j]) #* I DONT THINK MOLLY IMPLEMENTS THIS
+                @printf pf "%.15f %.15f %.15f\n" ustrip.(x_frac[j])...
+            end
+        end
+
+
+        F = uconvert.(u"eV / Å", AtomsCalculators.forces(sys, calc))
+        PE = uconvert.(u"eV", AtomsCalculators.potential_energy(sys, calc))
+
+        # Add data to infile.forces
+        open(joinpath(outdir, "infile.forces"), "a") do ff
+            for j in eachindex(F)
+                @printf ff "%.15f %.15f %.15f\n" ustrip.(F[j])...
+            end
+        end
+
+        # Add PE to infile.stat
+        write_partial_stat(
+            outdir, 
+            [PE],
+            [0.0],
+            [cc.temperature];
+            file_mode = "a"
+        )
+    end
+
 end

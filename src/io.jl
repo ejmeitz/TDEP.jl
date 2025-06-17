@@ -116,12 +116,13 @@ function write_ssposcar(outdir::String, cell_vectors::AbstractMatrix{L},
     end
 end
 
-# Just reads the positions from POSCAR
-function read_poscar_positions(path, natoms; cart = true)
+# Just reads the positions and cell from POSCAR
+function read_poscar_positions(path, natoms)
 
-    parse_line = (line) -> parse.(Float64, split(strip(line))[1:3])
+    parse_line = (line) -> SVector(parse.(Float64, split(strip(line))[1:3])...)
 
     positions = SVector{3, Float64}[]
+    cell = zeros(Float64, 3, 3)
 
     open(path, "r") do f
         readline(f)
@@ -130,7 +131,7 @@ function read_poscar_positions(path, natoms; cart = true)
         lv2 = scale .* parse.(Float64, split(strip(readline(f))))
         lv3 = scale .* parse.(Float64, split(strip(readline(f))))
 
-        cell_vectors = hcat(lv1, lv2, lv3) # cell vecs as columns
+        cell .= hcat(lv1, lv2, lv3) # cell vecs as columns
 
         readline(f) # skip species line
 
@@ -139,10 +140,11 @@ function read_poscar_positions(path, natoms; cart = true)
         
         readline(f) # skip "direct coordinates" line
         for _ in 1:natoms
-            r = parse_line(readline(f))
-            cart && r = cell_vectors * r
-            push!(positions, r)
+            x_frac = parse_line(readline(f))
+            push!(positions, x_frac)
         end
     end
+
+    return positions, cell
 
 end
