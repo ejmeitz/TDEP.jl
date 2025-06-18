@@ -87,7 +87,6 @@ function sTDEP(
     generate_configs(sys, cc_init, calc, init_dir, verbose)
 
     # Generate remaining configurations with IFCs from prior iteration
-    p = Progress(niter - 1)
     for i in 1:(niter - 1)
 
         cc = CanonicalConfiguration(
@@ -105,9 +104,7 @@ function sTDEP(
         execute(efc, outdir, ncores, verbose)
         # Generate DOS and Dispersion Data
         execute(pd, outdir, ncores, verbose)
-        next!(p)
     end
-    finish!(p)
 
 end
 
@@ -126,6 +123,7 @@ end
 function generate_configs(sys::AbstractSystem{3}, cc::CanonicalConfiguration, 
                             calc, outdir::String, verbose::Bool)
 
+    @info "Generating Configuratoins"
     execute(cc, outdir, 1, verbose)
 
     get_filepath = (i) -> joinpath(outdir, "contcar_conf$(lpad(i, 4, '0'))")
@@ -134,6 +132,7 @@ function generate_configs(sys::AbstractSystem{3}, cc::CanonicalConfiguration,
     F_units = (E_units == NoUnits) ? NoUnits : u"eV / Å"
 
     # Parse coordinates into sys object and calculate forces
+    p = Progress(cc.nconf, desc = "Calculating Forces")
     for i in 1:cc.nconf
         filepath = get_filepath(i)
         x_frac, cell_vec = read_poscar_positions(filepath, length(sys))
@@ -151,7 +150,6 @@ function generate_configs(sys::AbstractSystem{3}, cc::CanonicalConfiguration,
             )
 
         F = AtomsCalculators.forces(fs, calc)
-        println(F[1])
         PE = uconvert(E_units, AtomsCalculators.potential_energy(fs, calc))
 
         # Add data to infile.forces
@@ -176,7 +174,10 @@ function generate_configs(sys::AbstractSystem{3}, cc::CanonicalConfiguration,
             [cc.temperature];
             file_mode = "a"
         )
+
+        next!(p)
     end
+    finish!(p)
 
     # Write infile.meta
     write_meta(outdir, ustrip.(cc.temperature), cc.nconf, 1.0, length(sys))

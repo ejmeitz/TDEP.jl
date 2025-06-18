@@ -48,7 +48,7 @@ end
     a = 5.2468u"Å" # Lattice parameter for FCC Argon at 10 K
     fcc_crystal = SimpleCrystals.FCC(a, :Ar, SVector(4, 4, 4))
 
-    ase_calc = pyimport("ase.calculators.lj").LennardJones(sigma = 3.4, epsilon = 0.010423, rc = ustrip(r_cut))
+    ase_calc = pyimport("ase.calculators.lj").LennardJones(sigma = 3.4, epsilon = 0.010423, rc = 8.5)
     calc = ASEcalculator(ase_calc)
 
     sTDEP(
@@ -57,7 +57,7 @@ end
         basedir,
         2,
         20,
-        ustrip(r_cut),
+        8.5,
         10.0,
         2.5
     )
