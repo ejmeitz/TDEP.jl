@@ -4,32 +4,24 @@ Runs a molecular dynamics simulation with [Molly.jl](https://github.com/JuliaMol
 be generated from any other library compatible with the [AtomsBase.jl](https://github.com/JuliaMolSim/AtomsBase.jl) interface. For TDEP a common pattern would be to use the native [SimpleCrystals.jl](https://github.com/ejmeitz/SimpleCrystals.jl) library or [ASEconert.jl](https://github.com/mfherbst/ASEconvert.jl) to
 generate a AbstractSystem object which can be converted to a Molly System object. 
 
-The simulation is equilibrated for `n_steps_warmup` and then run for `n_steps` with the `sim` simulator (must be Langevin). If the `n_seeds` key-word argument
-is passed `n_seeds` simulations are run each initialized with different velocities. Data is saved every `sample_every` steps
-during the main run. 
+The `NVT` type controls the simulation properties such as length, warmup, and timestep. The simulation is equilibrated for `n_steps_warmup` and then run for `n_steps` with a Langevin thermostat. 
+If the `n_seeds` key-word argument is passed `n_seeds` simulations are run each initialized with different velocities. 
+Data is saved every `sample_every` steps during the main run. 
 
 The required data loggers are automatically attached to the System. You only need to define the structure and interaction. 
 
 This command will save the infile.positions, infile.forces, infile.stat, infile.meta and infile.ssposcar to `outdir`. Only the
 infile.ucposcar must be made to extract force constants.
 """
-function TDEP.generate_MDTDEP_dataset(sys::System{3}, sim, n_steps_warmup::Integer, n_steps::Integer, 
-                                    sample_every::Integer, outdir::String; n_seeds::Integer = 1)
+function TDEP.generate_MDTDEP_dataset(sys::System{3}, sim::NVT, outdir::String; n_seeds::Integer = 1)
+
+
 
     @assert Molly.n_infinite_dims(sys) == 0 "Box must be fully periodic"
 
     # Warn if stripping existing loggers
     if length(sys.loggers) > 0
         @warn "Found $(length(sys.loggers)) loggers, removing from system"
-    end
-
-    if !(typeof(sim) <: Langevin)
-        error("Simulator must be Langevin. If Molly has a new NVT simulator, open a PR.")
-    end
-
-    # By default this is 1, just to be safe check its on
-    if sim.remove_CM_motion == 0
-        @warn "You are not removing COM motion. You should probably set remove_CM_motion in the Langevin simulator."
     end
 
     #* HOW TO HANDLE MASSES
@@ -40,18 +32,18 @@ function TDEP.generate_MDTDEP_dataset(sys::System{3}, sim, n_steps_warmup::Integ
     FT = typeof(1.0*force_units)
     LT = typeof(1.0*length_units)
     ET = typeof(1.0*energy_units)
-    TT = typeof(sim.temperature)
+    TT = typeof(temperature(sim))
 
     new_loggers = (
-        forces = ForcesLogger(FT, sample_every), 
-        coords = CoordinatesLogger(LT, sample_every), 
-        pe = PotentialEnergyLogger(ET, sample_every), 
-        ke = KineticEnergyLogger(ET, sample_every),
-        temps = TemperatureLogger(TT, sample_every)
+        forces = ForcesLogger(FT, sim.sample_every), 
+        coords = CoordinatesLogger(LT, sim.sample_every), 
+        pe = PotentialEnergyLogger(ET, sim.sample_every), 
+        ke = KineticEnergyLogger(ET, sim.sample_every),
+        temps = TemperatureLogger(TT, sim.sample_every)
     )
 
-    n_samples = n_seeds * (div(n_steps, sample_every) + 1)
-    dt_fs = unit(sim.dt) == Unitful.NoUnits ? sim.dt : uconvert(u"fs", sim.dt)
+    n_samples = n_seeds * (div(sim.n_steps, sim.sample_every) + 1)
+    dt_fs = unit(dt(sim)) == Unitful.NoUnits ? dt(sim) : uconvert(u"fs", dt(sim))
     n_atoms = length(sys)
     
     posns_file = joinpath(outdir, "infile.positions")
@@ -64,7 +56,7 @@ function TDEP.generate_MDTDEP_dataset(sys::System{3}, sim, n_steps_warmup::Integ
     # Write ssposcar before we do dynamics
     cv = hcat(Molly.cell_vectors(sys)...) # matrix with vec as cols
     write_ssposcar(outdir, cv, sys.coords, Molly.atomic_symbol(sys))
-    write_meta(outdir, ustrip(sim.temperature), n_samples, dt_fs, n_atoms)
+    write_meta(outdir, ustrip(temperature(sim)), n_samples, dt_fs, n_atoms)
 
     for s in 1:n_seeds
         
@@ -77,11 +69,9 @@ function TDEP.generate_MDTDEP_dataset(sys::System{3}, sim, n_steps_warmup::Integ
             energy_units = u"eV",
             k = Molly.default_k(energy_units)
         )
-    
-        random_velocities!(new_system, sim.temperature)
-
-        simulate!(new_system, sim, n_steps_warmup; run_loggers=false)
-        simulate!(new_system, sim, n_steps)
+        
+        # Sets velos, runs warmup, runs main sim
+        run_sim!(new_system, sim)
 
         @info "Seed $s complete. Writing to disk."
 
@@ -109,7 +99,7 @@ function TDEP.generate_MDTDEP_dataset(sys::System{3}, sim, n_steps_warmup::Integ
             values(new_system.loggers.pe),
             values(new_system.loggers.ke),
             values(new_system.loggers.temps);
-            sampled_every = sample_every,
+            sampled_every = sim.sample_every,
             dt_fs = dt_fs, 
             file_mode = "a"
         )
