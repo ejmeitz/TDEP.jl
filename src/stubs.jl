@@ -1,4 +1,4 @@
-export generate_MDTDEP_dataset
+export generate_MDTDEP_dataset, NVT
 
 
 # This file contains function handles which are implemented
@@ -7,3 +7,10 @@ export generate_MDTDEP_dataset
 # users may want to download.
 
 function generate_MDTDEP_dataset end
+
+struct NVT
+    thermostat
+    n_steps_warmup::Integer
+    n_steps::Integer
+    sample_every::Integer
+end

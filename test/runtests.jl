@@ -1,6 +1,7 @@
 using Molly
 using TDEP
 using Test
+using PythonCall
 
 data_dir = joinpath(@__DIR__, "data")
 
@@ -66,16 +67,72 @@ end
 
 @testset "MD Extension" begin
     
-    rundir = "/mnt/merged/emeitz/tdep_jl_test"
-    sys = make_Ar_Molly_Sys()
+    outdir = "/mnt/merged/emeitz/tdep_jl_test"
+
+    # Settings
+    a = 5.2468u"Å" # Lattice parameter for FCC Argon at 10 K
     temp = 10.0u"K"
+    damping = 1.0u"ps^-1"
+    dt = 1.0u"fs"
+    n_steps_warmup = 2000
+    n_steps = 25_000
+    sample_every = 1_000
 
-    sim = Langevin(dt = 1.0u"fs", temperature = temp, friction = 1.0u"ps^-1")
-
-    generate_MDTDEP_dataset(sys, sim, 25_000, 50_000, 1_000, rundir; n_seeds = 2)
-
+    # Create Structure
+    fcc_crystal = SimpleCrystals.FCC(a, :Ar, SVector(4, 4, 4))
     to_ucposcar(fcc_crystal, joinpath(rundir, "infile.ucposcar"))
+
+    sim = NVT(temperature, damping, dt, n_steps_warmup, n_steps, sample_every)
+
+    generate_MDTDEP_dataset(fcc_crystal, sim, outdir; n_seeds = 2)
+
     efc = ExtractForceConstants(secondorder_cutoff = ustrip(r_cut))
     execute(efc, rundir)
+
+end
+
+
+@testset "TDEP Al MD Extension" begin
+
+    # Settings
+    a = 4.05u"Å" 
+    temp = 10.0u"K"
+    damping = 1.0u"ps^-1"
+    dt = 1.0u"fs"
+    n_steps_warmup = 2000
+    n_steps = 25_000
+    sample_every = 1_000
+    outdir = "/mnt/merged/emeitz/tdep_jl_test/group_meeting"
+
+    # Create Structure (SimpleCrystals.jl)
+    al_crystal = SimpleCrystals.FCC(a, 26.981539u"u", SVector(4, 4, 4))
+    to_ucposcar(al_crystal, joinpath(outdir, "infile.ucposcar"))
+
+    # Configure MD (Molly.jl)
+    sys = System(
+        al_crystal;
+        energy_units=u"eV",
+        force_units=u"eV * Å^-1",
+    )
+
+    ase_eam = pyimport("ase.calculators.eam")
+    pot = ase_eam.EAM(potential = "/home/emeitz/software/lammps/potentials/Al_zhou.eam.alloy")
+
+    calc = ASECalculator(
+        ase_calc=pot,
+        atoms=sys.atoms,
+        coords=sys.coords,
+        boundary=sys.boundary,
+        elements = fill("Al", length(sys.atoms))
+    )
+
+    sys = System(
+        sys;
+        general_inters=(calc,)
+    )
+
+    # Generate MD Dataset (TDEP.jl)
+    sim = NVT(temperature, damping, dt, n_steps_warmup, n_steps, sample_every)
+    generate_MDTDEP_dataset(sys, sim, outdir; n_seeds = 2)
 
 end

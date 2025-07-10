@@ -6,6 +6,7 @@ using StaticArrays
 using DelimitedFiles
 using ProgressMeter
 using Printf
+using FastGaussQuadrature
 
 # Define interfaces for systems and force calculation
 using AtomsBase
@@ -26,5 +27,7 @@ include("io.jl")
 include("stubs.jl")
 include("workflows/sTDEP.jl")
 
+# Include the simplified TDEP wrappers
+include("libolle/crystal_structure.jl")
 
 end
