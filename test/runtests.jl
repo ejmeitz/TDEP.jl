@@ -184,25 +184,26 @@ end
 
 @testset "TI Pair Potential" begin
 
-    ifc_path = ""
+    ifc_path = "/mnt/mntsdb/emeitz/ForceConstants/LJ_ALM/LJ_10K_residual.jld2"
     n_uc = 4
     a = 5.2468u"Å" # Lattice parameter for FCC Argon at 10 K
     temp = 10.0u"K"
     damping = 1.0u"ps^-1"
     dt = 1.0u"fs"
+    r_cut = 8.5u"Å"
     n_steps_warmup = 2000
     n_steps = 25_000
     sample_every = 1_000
     n_lambda = 13
 
     fcc_crystal = SimpleCrystals.FCC(a, :Ar, SVector(n_uc, n_uc, n_uc))
-    m = mass(fcc_crystal, 1)
+    m = AtomsBase.mass(fcc_crystal, 1)
 
     energy_unit = u"eV"
     length_unit = u"Å"
     ifc2_unit = energy_unit / length_unit^2
 
-    ifc2 = (jldopen(ifc_path, "dynmat") .* ustrip(m)) * ifc2_unit
+    ifc2 = (load(ifc_path, "dynmat") .* ustrip(m)) * ifc2_unit
 
     pot = LennardJones(cutoff=ShiftedForceCutoff(r_cut), )
 
@@ -226,7 +227,7 @@ end
 
     sys = System(sys; atoms=[updated_atoms...])
 
-    sim = NVT(temperature, damping, dt, n_steps_warmup, n_steps, sample_every)
+    sim = NVT(temp, damping, dt, n_steps_warmup, n_steps, sample_every)
 
     TI(
         sys,

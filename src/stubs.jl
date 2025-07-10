@@ -1,4 +1,4 @@
-export generate_MDTDEP_dataset, NVT
+export generate_MDTDEP_dataset, NVT, TI
 
 
 # This file contains function handles which are implemented
@@ -14,3 +14,5 @@ struct NVT
     n_steps::Integer
     sample_every::Integer
 end
+
+function TI end
