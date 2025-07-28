@@ -49,7 +49,7 @@ end
 function AtomsCalculators.forces(sys, inter::HarmonicPotential; kwargs...)
     inter.u_storage .= sys.coords .- inter.r₀
     one_T = one(float_type(sys)) # get 1.0 with proper floating point precision
-    return -one_T .* (inter.ifc2 * u_storage)
+    return -one_T .* (inter.ifc2 * inter.u_storage)
 end
 
 function AtomsCalculators.potential_energy(sys, inter::HarmonicPotential; kwargs...)
