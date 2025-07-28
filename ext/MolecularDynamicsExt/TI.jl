@@ -4,7 +4,7 @@ function TDEP.TI(
         sys::System{3},
         pair_pot,
         sim::NVT,
-        ifc2::AbstractMatrix,
+        ifc2::Matrix,
         lambdas::AbstractVector;
         weights = ones(length(lambdas)) ./ length(lambdas)
     )
@@ -19,7 +19,7 @@ function TDEP.TI(
         sys::System{3},
         pair_pot,
         sim::NVT,
-        ifc2::AbstractMatrix,
+        ifc2::Matrix,
         n_lambda::Integer,
         quadrature_rule::Function = FastGaussQuadrature.gausslegendre
     )
@@ -39,7 +39,7 @@ end
 
 function HarmonicPotential(ifc2, r₀)
     T = eltype(ifc2)
-    return HarmonicPotential{T}(ifc2, r₀, similar(r₀))
+    return HarmonicPotential{T, typeof(r₀)}(ifc2, r₀, similar(r₀))
 end
 
 # function HarmonicPotential(ifc2_path::String)
