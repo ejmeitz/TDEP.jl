@@ -4,7 +4,7 @@ function TDEP.TI(
         sys::System{3},
         pair_pot,
         sim::NVT,
-        ifc2,
+        ifc2::AbstractMatrix,
         lambdas::AbstractVector;
         weights = ones(length(lambdas)) ./ length(lambdas)
     )
@@ -19,13 +19,13 @@ function TDEP.TI(
         sys::System{3},
         pair_pot,
         sim::NVT,
-        ifc2,
+        ifc2::AbstractMatrix,
         n_lambda::Integer,
         quadrature_rule::Function = FastGaussQuadrature.gausslegendre
     )
 
     λ, w = quadrature_rule(n_lambda)
-    return TI(sys, pair_pot, sim, λ, ifc2; weights = w)
+    return TI(sys, pair_pot, sim, ifc2, λ; weights = w)
 
 end
 
