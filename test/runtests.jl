@@ -184,6 +184,11 @@ end
 
 @testset "TI Pair Potential" begin
 
+    # using Molly
+    # using TDEP
+    # using SimpleCrystals
+    # using JLD2
+
     ifc_path = "/mnt/mntsdb/emeitz/ForceConstants/LJ_ALM/LJ_10K_residual.jld2"
     n_uc = 4
     a = 5.2468u"Å" # Lattice parameter for FCC Argon at 10 K
@@ -231,6 +236,7 @@ end
 
     TI(
         sys,
+        pot,
         sim,
         ifc2,
         n_lambda,

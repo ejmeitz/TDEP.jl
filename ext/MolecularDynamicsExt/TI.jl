@@ -1,6 +1,6 @@
 export TI, HarmonicPotential
 
-function TI(
+function TDEP.TI(
         sys::System{3},
         sim::NVT,
         ifc2,
@@ -14,7 +14,7 @@ function TI(
 end
 
 
-function TI(
+function TDEP.TI(
         sys::System{3},
         sim::NVT,
         ifc2,
@@ -116,10 +116,14 @@ function AtomsCalculators.potential_energy(sys, inter::MixedHamiltonian;
 end
 
 # Runs MD simulation to approximate ΔU
-function TI_core(sys::System{3}, sim::NVT, λ, ifc2)
+function TI_core(sys::System{3}, pair_pot, sim::NVT, λ, ifc2)
 
     if length(sys.loggers) > 0
         @warn "Found $(length(sys.loggers)) loggers, removing from system"
+    end
+
+    if length(sys.pairwise_inters) > 0 || length(sys.general_inters) > 0 || length(sys.specific_inter_lists) > 0
+        @warn "System passed with interactions, these will be ignored."
     end
 
     length_units = u"Å"
@@ -136,11 +140,9 @@ function TI_core(sys::System{3}, sim::NVT, λ, ifc2)
     #* HOW TO LOAD IFCS
     hp = HarmonicPotential(ifc2, copy(sys.coords))
 
-    pot = LennardJones(cutoff=ShiftedForceCutoff(8.5u"Å"), )
-
     mixed_H = MixedHamiltonian(
         λ, 
-        pot,
+        pair_pot,
         hp,
         sim.n_steps;
         energy_units = energy_units
