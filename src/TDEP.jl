@@ -8,6 +8,7 @@ using ProgressMeter
 using Printf
 using FastGaussQuadrature
 using LinearAlgebra
+using StatsBase
 
 # Define interfaces for systems and force calculation
 using AtomsBase

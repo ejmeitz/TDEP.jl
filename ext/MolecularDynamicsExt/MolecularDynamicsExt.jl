@@ -7,6 +7,8 @@ using Printf
 using FastGaussQuadrature
 using AtomsCalculators
 using LinearAlgebra
+using StatsBase
+using ProgressMeter
 
 include("util.jl")
 include("MDTDEP.jl")

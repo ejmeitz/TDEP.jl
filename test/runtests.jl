@@ -189,18 +189,23 @@ end
     using SimpleCrystals
     using JLD2
 
-    ifc_path = "/mnt/mntsdb/emeitz/ForceConstants/LJ_ALM/LJ_10K_residual.jld2"
+    # ifc_path = "/mnt/mntsdb/emeitz/ForceConstants/LJ_ALM/LJ_10K_residual.jld2"
+    ifc_path = raw"C:/Users/ejmei/Desktop/LJ_10K_residual.jld2"
     n_uc = 4
     a = 5.2468u"Å" # Lattice parameter for FCC Argon at 10 K
     temp = 10.0u"K"
     damping = 1.0u"ps^-1"
     dt = 1.0u"fs"
     r_cut = 8.5u"Å"
-    n_steps_warmup = 2000
-    n_steps = 25_000
-    sample_every = 1_000
-    n_lambda = 13
+    n_steps_warmup = 50_000
+    n_steps = 250_000
+    sample_every = 50
+    n_lambda = 15
 
+    ifc_conv = 23.060541945 # converts kcal/mol/Ang^2 to eV/Ang^2
+    f_conv = sqrt(418.4) * 1e12 # converts freqs from real units --> rad /s 
+    # f_conv = 9.82269474855602e13 # converts freqs from metal units --> rad / s
+    
     fcc_crystal = SimpleCrystals.FCC(a, :Ar, SVector(n_uc, n_uc, n_uc))
     m = AtomsBase.mass(fcc_crystal, 1)
 
@@ -208,7 +213,9 @@ end
     length_unit = u"Å"
     ifc2_unit = energy_unit / length_unit^2
 
-    ifc2 = (load(ifc_path, "dynmat") .* ustrip(m)) * ifc2_unit
+    freqs_sq, dynmat = load(ifc_path, "freqs_sq", "dynmat");
+    freqs = (f_conv .* sqrt.(freqs_sq)) * u"rad / s";
+    ifc2 = (dynmat .* ustrip(m)  ./ ifc_conv) * ifc2_unit
 
     pot = LennardJones(cutoff=ShiftedForceCutoff(r_cut), )
 
@@ -233,11 +240,12 @@ end
 
     sim = NVT(temp, damping, dt, n_steps_warmup, n_steps, sample_every)
 
-    TI(
+    ΔF = TI(
         sys,
         pot,
         sim,
         ifc2,
+        freqs,
         n_lambda,
     )
 end
