@@ -6,6 +6,7 @@ using Unitful
 using Printf
 using FastGaussQuadrature
 using AtomsCalculators
+using LinearAlgebra
 
 include("util.jl")
 include("MDTDEP.jl")

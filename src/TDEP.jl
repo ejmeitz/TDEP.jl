@@ -7,6 +7,7 @@ using DelimitedFiles
 using ProgressMeter
 using Printf
 using FastGaussQuadrature
+using LinearAlgebra
 
 # Define interfaces for systems and force calculation
 using AtomsBase
