@@ -2,13 +2,14 @@ export TI, HarmonicPotential
 
 function TDEP.TI(
         sys::System{3},
+        pair_pot,
         sim::NVT,
         ifc2,
         lambdas::AbstractVector;
         weights = ones(length(lambdas)) ./ length(lambdas)
     )
 
-    f = (x) -> TI_core(sys, sim, x, ifc2)
+    f = (x) -> TI_core(sys, pair_pot, sim, x, ifc2)
     return dot(weights, f.(lambdas))
 
 end
@@ -16,6 +17,7 @@ end
 
 function TDEP.TI(
         sys::System{3},
+        pair_pot,
         sim::NVT,
         ifc2,
         n_lambda::Integer,
@@ -23,7 +25,7 @@ function TDEP.TI(
     )
 
     λ, w = quadrature_rule(n_lambda)
-    return TI(sys, sim, λ, ifc2; weights = w)
+    return TI(sys, pair_pot, sim, λ, ifc2; weights = w)
 
 end
 

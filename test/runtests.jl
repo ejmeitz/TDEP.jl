@@ -214,7 +214,6 @@ end
 
     sys = System(
         fcc_crystal;
-        pairwise_inters=(pot,),
         energy_units=u"eV",
         force_units=u"eV * Å^-1",
     )
