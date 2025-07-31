@@ -29,12 +29,12 @@ temperature(nvt::TDEP.NVT) = nvt.thermostat.temperature
 dt(nvt::TDEP.NVT) = nvt.thermostat.dt
 thermostat(nvt::TDEP.NVT) = nvt.thermostat
 
-function run_sim!(sys::Molly.System{3}, sim::TDEP.NVT; run_loggers_warmup = false)
+function run_sim!(sys::Molly.System{3}, sim::TDEP.NVT; run_loggers_warmup = false, nthreads = Threads.nthreads())
     
     random_velocities!(sys, temperature(sim))
 
-    simulate!(sys, thermostat(sim), sim.n_steps_warmup; run_loggers=run_loggers_warmup)
-    simulate!(sys, thermostat(sim), sim.n_steps)
+    simulate!(sys, thermostat(sim), sim.n_steps_warmup; run_loggers=run_loggers_warmup, n_threads = nthreads)
+    simulate!(sys, thermostat(sim), sim.n_steps, n_threads = nthreads)
 
     return sys
 

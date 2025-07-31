@@ -30,7 +30,8 @@ function TDEP.TI(
         freqs,
         U0,
         lambdas;
-        weights
+        weights,
+        nthreads = Threads.nthreads(),
     )
 
     if !all(0.0 .<= lambdas .<= 1.0)
@@ -40,7 +41,7 @@ function TDEP.TI(
     ET = typeof(1.0u"eV")
     mean_ΔUs = zeros(ET, length(lambdas)) # ⟨ΔU⟩
 
-    f = (x) -> TI_core(sys, pair_pot, sim, x, ifc2, U0)
+    f = (x) -> TI_core(sys, pair_pot, sim, x, ifc2, U0; nthreads = nthreads)
 
     p = Progress(length(lambdas); dt=1.0)
     for (i, λ) in enumerate(lambdas)
@@ -75,7 +76,8 @@ function TDEP.TI(
         ifc2::Matrix,
         freqs,
         U0,
-        n_lambda::Integer,
+        n_lambda::Integer;
+        nthreads = Threads.nthreads(),
         quadrature_rule::Function = FastGaussQuadrature.gausslegendre
     )
 
@@ -91,7 +93,7 @@ function TDEP.TI(
     # println(λ)
     # return
 
-    return TI(sys, pair_pot, sim, ifc2, freqs, U0, λ; weights = w)
+    return TI(sys, pair_pot, sim, ifc2, freqs, U0, λ; weights = w, nthreads = nthreads)
 
 end
 
@@ -193,7 +195,7 @@ function AtomsCalculators.potential_energy(sys, inter::MixedHamiltonian;
 end
 
 # Runs MD simulation to approximate ΔU
-function TI_core(sys::System{D}, pair_pot, sim::NVT, λ, ifc2, U0) where D
+function TI_core(sys::System{D}, pair_pot, sim::NVT, λ, ifc2, U0; nthreads = Threads.nthreads()) where D
 
     if length(sys.loggers) > 0
         @warn "Found $(length(sys.loggers)) loggers, removing from system"
@@ -239,7 +241,7 @@ function TI_core(sys::System{D}, pair_pot, sim::NVT, λ, ifc2, U0) where D
         k = Molly.default_k(energy_units)
     )
 
-    run_sim!(new_system, sim; run_loggers_warmup = true)
+    run_sim!(new_system, sim; run_loggers_warmup = true, nthreads = nthreads)
 
     n_samples_warmup = div(sim.n_steps_warmup, sim.sample_every) + 1
 

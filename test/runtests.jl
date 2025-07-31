@@ -251,7 +251,8 @@ end
                             ifc2,
                             freqs,
                             U0,
-                            n_lambda,
+                            n_lambda;
+                            nthreads = 2
                         )
 end
 
