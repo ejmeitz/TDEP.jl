@@ -190,17 +190,21 @@ end
     using JLD2
 
     # ifc_path = "/mnt/mntsdb/emeitz/ForceConstants/LJ_ALM/LJ_10K_residual.jld2"
-    ifc_path = raw"C:/Users/ejmei/Desktop/LJ_10K_residual.jld2"
+    # ifc_path = raw"C:/Users/ejmei/Desktop/LJ_TDEP_80K_5UC.jld2"
+    ifc_path = raw"C:\Users\ejmei\Desktop\LJ_10K_residual.jld2"
     n_uc = 4
     a = 5.2468u"Å" # Lattice parameter for FCC Argon at 10 K
     temp = 10.0u"K"
-    damping = 1.0u"ps^-1"
-    dt = 1.0u"fs"
+    damping = 0.5u"ps^-1"
+    dt = 2.0u"fs"
     r_cut = 8.5u"Å"
     n_steps_warmup = 50_000
     n_steps = 250_000
     sample_every = 50
-    n_lambda = 15
+    n_lambda = 13
+    # U0 = -20.06716u"eV" #! DEPENDS ON NUMBER OF ATOMS and TEMP!
+    # U0 = -19.903232u"eV" # 10K
+    U0 = 0.0u"eV"
 
     ifc_conv = 23.060541945 # converts kcal/mol/Ang^2 to eV/Ang^2
     f_conv = sqrt(418.4) * 1e12 # converts freqs from real units --> rad /s 
@@ -217,7 +221,7 @@ end
     freqs = (f_conv .* sqrt.(freqs_sq)) * u"rad / s";
     ifc2 = (dynmat .* ustrip(m)  ./ ifc_conv) * ifc2_unit
 
-    pot = LennardJones(cutoff=ShiftedForceCutoff(r_cut), )
+    pot = LennardJones(; cutoff=ShiftedForceCutoff(r_cut), )
 
     sys = System(
         fcc_crystal;
@@ -240,12 +244,75 @@ end
 
     sim = NVT(temp, damping, dt, n_steps_warmup, n_steps, sample_every)
 
-    ΔF = TI(
-        sys,
-        pot,
-        sim,
-        ifc2,
-        freqs,
-        n_lambda,
-    )
+    ΔF, F0, mean_ΔUs = TI(
+                            sys,
+                            pot,
+                            sim,
+                            ifc2,
+                            freqs,
+                            U0,
+                            n_lambda,
+                        )
 end
+
+
+# T = 10.0u"K"
+# pot = LennardJones(cutoff=ShiftedForceCutoff(r_cut), )
+
+# sys = System(
+#         fcc_crystal;
+#         pairwise_inters=(pot,),
+#         energy_units=u"eV",
+#         force_units=u"eV * Å^-1",
+#     )
+
+
+# # Set sigma and epsilon parameters properly
+# σ = 3.4u"Å"
+# ϵ = 0.010423u"eV"
+# updated_atoms = []
+
+# for i in eachindex(sys)
+#     push!(updated_atoms, Molly.Atom(index=sys.atoms[i].index, atom_type=sys.atoms[i].atom_type,
+#                             mass=sys.atoms[i].mass, charge=sys.atoms[i].charge,
+#                             σ=σ, ϵ=ϵ))
+# end
+
+# sys = System(sys; 
+#             atoms=[updated_atoms...], 
+#             loggers=(disp = DisplacementsLogger(50, sys.coords),
+#             traj = XYZWriter(50, "C:/Users/ejmei/Desktop/LJ_traj.xyz"))
+# )
+
+# sim = NVT(temp, damping, dt, n_steps_warmup, n_steps, sample_every)
+
+# random_velocities!(sys, T)
+
+# simulate!(sys, sim.thermostat, sim.n_steps_warmup; run_loggers=true)
+# simulate!(sys, sim.thermostat, sim.n_steps)
+
+
+# # True: -0.0820714
+# # 4UC : -0.06997523423449314 
+# # 5UC : -0.0701189 
+
+
+# struct XYZWriter
+#     n_steps::Int
+#     filepath::String
+# end
+
+
+# function Molly.log_property!(logger::XYZWriter, sys::System, neighbors=nothing,
+#                        step_n::Integer=0; kwargs...)
+#     if step_n % logger.n_steps == 0
+#         open(logger.filepath, "a") do file
+#             write(file, "$(length(sys.atoms))\n")
+#             write(file, "Step: $step_n\n")
+#             for atom in sys.atoms
+#                 pos = ustrip.(sys.coords[atom.index])
+#                 write(file, "$(atom.atom_type) $(pos[1]) $(pos[2]) $(pos[3])\n")
+#             end
+#         end
+#     end
+# end
