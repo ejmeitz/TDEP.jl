@@ -64,7 +64,7 @@ function TDEP.TI(
     kB = sys.k # Boltzmann constant
     F0 = F_harmonic(freqs_rad_s, ħ, kB, temperature(sim))
 
-    return ΔF, F0, mean_ΔUs
+    return ΔF, F0, mean_ΔUs, lambdas
 
 end
 

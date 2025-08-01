@@ -13,28 +13,61 @@ const N_THREADS_PER_TASK = Int(N_THREADS_TOTAL / N_THREADS_PER_SIM)
 
 function lambda_study(sys::System, sim::NVT, pair_pot, ifc2, freqs, U0, n_lambdas::Vector{Int}, outpath::String)
     F = []
+    delF_arr = []
+    F0_arr = []
     delU_data = Dict()
+    λs = Dict()
     # p = Progress(length(n_lambdas); dt = 5, desc = "Lambda Study:")
     @tasks for N in n_lambdas
         @info "Starting $N"
         @set ntasks = N_THREADS_PER_TASK
-        delF, F0, mean_delUs = TI(sys, pair_pot, sim, ifc2, freqs, U0, N; nthreads = N_THREADS_PER_SIM)
-        push!(F, delF + F0)
-        delU_data[N] = mean_delUs
+        delF, F0, delU_data[N], λs[N] = TI(sys, pair_pot, sim, ifc2, freqs, U0, N; nthreads = N_THREADS_PER_SIM)
+        push!(F, delF + F0 + U0)
+        push!(delF_arr, delF)
+        push!(F0_arr, F0 + U0) # F_TDEP = F_harmonic + <V - V2>
         # next!(p)
     end
     # finish!(p)
 
     for N in n_lambdas
-        s1 = scatter(collect(range(1,N)), ustrip.(delU_data[N]) ./ length(sys); xlabel = "Lambda", ylabel = "<ΔU> [eV / atom]")
+        s1 = scatter(λs[N], ustrip.(delU_data[N]) ./ length(sys); xlabel = "Lambda", ylabel = "<ΔU> [eV / atom]")
         savefig(s1, joinpath(outpath, "lambda$(N).png"))
     end
 
     open(joinpath(outpath, "F.txt"), "w") do f
-        writedlm(f, F, ",")
+        writedlm(f, [ustrip.(F0_arr) ustrip.(delF_arr) ustrip.(F)], ",")
     end
     s2 = scatter(n_lambdas, F ./ length(sys), xlabel = "Number of Quadrature Points", ylabel = "F [eV / atom]")
     savefig(s2, joinpath(outpath, "F_vs_Nlambda.png"))
+end
+
+function N_steps_study(sys::System, sims::Vector{NVT}, pair_pot, ifc2, freqs, U0, n_lambda, outpath::String)
+
+    F = []
+    delF_arr = []
+    F0_arr = []
+    delU_data = Dict()
+    λs = Dict()
+    # p = Progress(length(n_lambdas); dt = 5, desc = "Lambda Study:")
+    @tasks for sim in sims
+        NSTEPS = sim.n_steps
+        @info "Starting $NSTEPS"
+        @set ntasks = N_THREADS_PER_TASK
+        delF, F0, delU_data[NSTEPS], λs[NSTEPS] = TI(sys, pair_pot, sim, ifc2, freqs, U0, n_lambda; nthreads = N_THREADS_PER_SIM)
+        push!(F, delF + F0 + U0)
+        push!(delF_arr, delF)
+        push!(F0_arr, F0 + U0) # F_TDEP = F_harmonic + <V - V2>
+        # next!(p)
+    end
+
+    all_n_steps = [sim.n_steps for sim in sims]
+
+    open(joinpath(outpath, "F.txt"), "w") do f
+        writedlm(f, [ustrip.(F0_arr) ustrip.(delF_arr) ustrip.(F)], ",")
+    end
+    s1 = scatter(all_n_steps, F ./ length(sys), xlabel = "Number of Steps (Sampled every $(sim.sample_every))", ylabel = "F [eV / atom]")
+    savefig(s1, joinpath(outpath, "F_vs_nsteps.png"))
+
 end
 
 function init_LJ_system(n_uc; a = 5.2468u"Å", r_cut = 8.5u"Å")
@@ -81,12 +114,15 @@ end
 damping = 0.5u"ps^-1"
 n_steps_warmup = 100_000
 n_steps = 1_000_000
+n_steps_arr = [50_000, 100_000, 250_000, 500_000, 1_000_000]
 sample_every = 50
 n_lambdas = collect(range(5, 15, step = 2))
+n_lambda_optimal = 9 # probably can go lower, this feels safe though
 energy_unit = u"eV"
 length_unit = u"Å"
 ifc2_unit = energy_unit / length_unit^2
-outpath = (T) -> "/mnt/merged/emeitz/TDEP_TI_Test/$(ustrip(T))K/lambda_study"
+# outpath = (T) -> "/mnt/merged/emeitz/TDEP_TI_Test/$(ustrip(T))K/lambda_study"
+outpath = (T) -> "/mnt/merged/emeitz/TDEP_TI_Test/$(ustrip(T))K/nsteps_study"
 
 
 #LJ Settings
@@ -101,14 +137,29 @@ f_conv = sqrt(418.4) * 1e12 # converts freqs from real units --> rad /s
 # LAMBDA STUDY
 # CHOOSE LARGE SIM LENGTHS AND LARGEST
 # SYSTEM SIZE TO MINIMIZE THEIR EFFECTS
+# for (i,T) in enumerate(temps)
+#     @info "T = $(T)"
+#     sys, pot = init_LJ_system(n_uc[1])
+#     sim = NVT(T, damping, dt, n_steps_warmup, n_steps, sample_every)
+#     freqs, ifc2 = setup_ifcs(ifc_path(n_uc[1], T), sys.masses[1], f_conv, ifc_conv, ifc2_unit)
+#     OP = outpath(T)
+#     mkpath(OP)
+#     lambda_study(sys, sim, pot, ifc2, freqs, U0s[i], n_lambdas, OP)
+# end
+
+
+# NSTEPS STUDY
+# CHOOSE LARGE SIM LENGTHS AND LARGEST
+# SYSTEM SIZE TO MINIMIZE THEIR EFFECTS
+init_nvt_n_steps = (N) -> NVT(T, damping, dt, n_steps_warmup, N, sample_every)
 for (i,T) in enumerate(temps)
     @info "T = $(T)"
     sys, pot = init_LJ_system(n_uc[1])
-    sim = NVT(T, damping, dt, n_steps_warmup, n_steps, sample_every)
     freqs, ifc2 = setup_ifcs(ifc_path(n_uc[1], T), sys.masses[1], f_conv, ifc_conv, ifc2_unit)
     OP = outpath(T)
     mkpath(OP)
-    lambda_study(sys, sim, pot, ifc2, freqs, U0s[i], n_lambdas, OP)
+    sims = init_nvt_n_steps.(n_steps_arr)
+    N_steps_study(sys, sims, pot, ifc2, freqs, U0s[i], n_lambda_optimal, OP)
 end
 
 ########################################################
