@@ -13,7 +13,8 @@ The required data loggers are automatically attached to the System. You only nee
 This command will save the infile.positions, infile.forces, infile.stat, infile.meta and infile.ssposcar to `outdir`. Only the
 infile.ucposcar must be made to extract force constants.
 """
-function TDEP.generate_MDTDEP_dataset(sys::System{3}, sim::NVT, outdir::String; n_seeds::Integer = 1)
+function TDEP.generate_MDTDEP_dataset(sys::System{3}, sim::NVT, outdir::String; 
+                                        n_seeds::Integer = 1, n_threads::Integer = Threads.nthreads())
 
 
 
@@ -71,7 +72,7 @@ function TDEP.generate_MDTDEP_dataset(sys::System{3}, sim::NVT, outdir::String; 
         )
         
         # Sets velos, runs warmup, runs main sim
-        run_sim!(new_system, sim)
+        run_sim!(new_system, sim; nthreads = n_threads)
 
         @info "Seed $s complete. Writing to disk."
 

@@ -245,10 +245,10 @@ function TI_core(sys::System{D}, pair_pot, sim::NVT, λ, ifc2, U0; nthreads = Th
 
     n_samples_warmup = div(sim.n_steps_warmup, sim.sample_every) + 1
 
-    println()
-    println("λ = $(mixed_H.λ)")
-    println("Max Dispalcement, ", maximum(norm.(new_system.loggers.disp.last_displacements)))
-    println()
+    # println()
+    # println("λ = $(mixed_H.λ)")
+    # println("Max Dispalcement, ", maximum(norm.(new_system.loggers.disp.last_displacements)))
+    # println()
 
     return @views mean(mixed_H.ΔU_storage[n_samples_warmup : end])
 
