@@ -5,7 +5,7 @@ export CanonicalConfiguration
                             mindist = -1, debye_temperature = -1.0, maximum_frequency = -1.0)
 
 # Arguments 
-- `temperature::T`: Temperature to emulate.
+- `temperature::T`: Temperature to emulate in Kelvin.
 - `nconf::Int`: Number of configurations to generate.
 - `quantum::Bool = false` : Use Bose-Einstein statistics instead of Maxwell-Boltzmann.
 - `output_format::Int = 1`: (1) VASP (2) Abinit (4) FHI-Aims (5) Siesta

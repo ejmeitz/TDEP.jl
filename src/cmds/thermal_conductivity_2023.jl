@@ -47,3 +47,11 @@ Base.@kwdef struct ThermalConductivity2023{T} <: TDEP_Command{T}
 end
 
 cmd_name(::ThermalConductivity2023) = "thermal_conductivity_2023"
+
+function required_files(tc::ThermalConductivity2023)
+    required_files = ["infile.ucposcar", "infile.forceconstant", "infile.forceconstant_thirdorder"]
+
+    if tc.readiso
+        required_files = [required_files; "infile.isotopes"]
+    end
+end

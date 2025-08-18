@@ -41,3 +41,15 @@ Base.@kwdef struct ExtractForceConstants{T} <: TDEP_Command{T}
 end
 
 cmd_name(::ExtractForceConstants) = "extract_forceconstants"
+
+function required_files(efc::ExtractForceConstants)
+
+    required_files = ["infile.ucposcar", "infile.ssposcar", "infile.stat",
+                      "infile.positions", "infile.forces", "infile.meta"]
+
+    if efc.polar
+        required_files = [required_files; "infile.lotosplitting"]
+    end
+
+    return required_files
+end
