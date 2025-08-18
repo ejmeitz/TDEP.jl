@@ -65,6 +65,22 @@ function poscar_symbol_block(symbols::AbstractVector{T}) where T
     return symbol_line, count_line
 end
 
+function read_poscar_symbol_block(filepath::String)
+    species_line = ""
+    count_line = ""
+    open(filepath, "r") do f
+        for _ in 1:5 
+            readline(f)
+        end
+        species_line = readline(f)
+        count_line = readline(f)
+    end
+    symbols = Symbol.(split(strip(species_line)))
+    counts = parse.(Int, split(strip(count_line)))
+
+    return symbols, counts
+end
+
 function to_frac_coords(cell::AbstractMatrix{L}, position::AbstractVector{L}) where L
     return mod.(cell \ position, L(1.0))
 end
@@ -117,7 +133,7 @@ function write_ssposcar(outdir::String, cell_vectors::AbstractMatrix{L},
 end
 
 # Just reads the positions and cell from POSCAR
-function read_poscar_positions(path, natoms)
+function read_poscar_positions(path; n_atoms = nothing)
 
     parse_line = (line) -> SVector(parse.(Float64, split(strip(line))[1:3])...)
 
@@ -136,10 +152,12 @@ function read_poscar_positions(path, natoms)
         readline(f) # skip species line
 
         natoms_file = sum(parse.(Int, split(strip(readline(f)))))
-        @assert natoms_file == natoms "Poscar has $(natoms_file) but you told me it would have $(natoms)"
+        if !isnothing(n_atoms) && natoms_file != n_atoms
+            error(ArgumentError("Poscar has $(natoms_file) but you told me it would have $(natoms)"))
+        end
         
         readline(f) # skip "direct coordinates" line
-        for _ in 1:natoms
+        for _ in 1:natoms_file
             x_frac = parse_line(readline(f))
             push!(positions, x_frac)
         end
