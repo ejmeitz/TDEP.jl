@@ -166,3 +166,35 @@ function read_poscar_positions(path; n_atoms = nothing)
     return positions, cell
 
 end
+
+function read_poscar_positions!(positions, path; n_atoms = nothing)
+
+    parse_line = (line) -> SVector(parse.(Float64, split(strip(line))[1:3])...)
+
+    cell = zeros(Float64, 3, 3)
+
+    open(path, "r") do f
+        readline(f)
+        scale = parse(Float64, readline(f))
+        lv1 = scale .* parse.(Float64, split(strip(readline(f))))
+        lv2 = scale .* parse.(Float64, split(strip(readline(f))))
+        lv3 = scale .* parse.(Float64, split(strip(readline(f))))
+
+        cell .= hcat(lv1, lv2, lv3) # cell vecs as columns
+
+        readline(f) # skip species line
+
+        natoms_file = sum(parse.(Int, split(strip(readline(f)))))
+        if !isnothing(n_atoms) && natoms_file != n_atoms
+            error(ArgumentError("Poscar has $(natoms_file) but you told me it would have $(natoms)"))
+        end
+        
+        readline(f) # skip "direct coordinates" line
+        for i in 1:natoms_file
+            positions[i] = parse_line(readline(f))
+        end
+    end
+
+    return positions, cell
+
+end

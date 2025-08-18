@@ -1,5 +1,15 @@
 export TDEPSystem
 
+"""
+    TDEPSystem(ssposcar_path::String; 
+               ssposcar_is_frac::Bool = true,
+               store_frac_coords::Bool = false)
+
+Constructs an AtomsBase compatible system object given the path to
+an ssposcar file. `ssposcar_is_frac` sets if the poscar file is in 
+fractional coordinates or not. `store_frac_coords` dicates where
+this object stores the coordinates as fractional or Cartesian. 
+"""
 struct TDEPSystem{TCELL, L <: Unitful.Length, M <: Unitful.Mass, S} <: AbstractSystem{3}
     cell::TCELL
     position::Vector{SVector{3, L}}
@@ -8,15 +18,20 @@ struct TDEPSystem{TCELL, L <: Unitful.Length, M <: Unitful.Mass, S} <: AbstractS
     print_str::String
 end
 
-function TDEPSystem(ssposcar_path::String; frac_coords::Bool = true)
 
-    xs, cell_vec = read_poscar_positions(ssposcar_path)
+function TDEPSystem(ssposcar_path::String; 
+                    ssposcar_is_frac::Bool = true,
+                    store_frac_coords::Bool = false)
+
+    x_ss, cell_vec = read_poscar_positions(ssposcar_path)
     cell_vec = cell_vec * u"Å"
 
-    if frac_coords
-        x_cart = [SVector((cell_vec*xf)...) for xf in xs]
+    convert_to_cart = (!store_frac_coords && ssposcar_is_frac)
+
+    if convert_to_cart
+        posns = [SVector((cell_vec*xf)...) for xf in x_ss]
     else
-        x_cart = [SVector(x...) for x in xs]
+        posns = [SVector(x...) for x in x_ss]
     end
 
     symbols, counts = read_poscar_symbol_block(ssposcar_path)
@@ -32,9 +47,9 @@ function TDEPSystem(ssposcar_path::String; frac_coords::Bool = true)
         )
     cell = PeriodicCell(; cell_vectors = c, periodicity = (true, true, true))
 
-    return TDEPSystem{typeof(cell), eltype(first(x_cart)), eltype(m), eltype(syms)}(
+    return TDEPSystem{typeof(cell), eltype(first(posns)), eltype(m), eltype(syms)}(
             cell,
-            x_cart,
+            posns,
             syms, 
             m,
             print_str

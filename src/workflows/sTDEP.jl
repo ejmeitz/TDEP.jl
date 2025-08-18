@@ -123,7 +123,7 @@ end
 function generate_configs(sys::AbstractSystem{3}, cc::CanonicalConfiguration, 
                             calc, outdir::String, verbose::Bool)
 
-    @info "Generating Configuratoins"
+    @info "Generating Configurations"
     execute(cc, outdir, 1, verbose)
 
     get_filepath = (i) -> joinpath(outdir, "contcar_conf$(lpad(i, 4, '0'))")
