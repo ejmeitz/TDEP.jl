@@ -43,8 +43,9 @@ function TDEPSystem(ssposcar_path::String;
             SVector(cell_vec[1:3, 3]...)
         )
     cell = PeriodicCell(; cell_vectors = c, periodicity = (true, true, true))
-
-    return TDEPSystem{typeof(cell), eltype(first(posns)), eltype(m), eltype(syms)}(
+    
+    L = eltype(first(posns))
+    return TDEPSystem{typeof(cell), L, eltype(m), eltype(syms)}(
             cell,
             posns,
             syms, 

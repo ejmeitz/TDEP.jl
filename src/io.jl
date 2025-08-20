@@ -132,10 +132,7 @@ function write_ssposcar(outdir::String, cell_vectors::AbstractMatrix{L},
     end
 end
 
-# Just reads the positions and cell from POSCAR
-function read_poscar_positions(path; n_atoms = nothing,
-                                ssposcar_is_frac::Bool = true,
-                                store_frac_coords::Bool = false)
+function read_poscar_cell(path; n_atoms = nothing)
 
     cell = zeros(Float64, 3, 3)
 
@@ -158,7 +155,17 @@ function read_poscar_positions(path; n_atoms = nothing,
 
     end
 
-    parse_line = (line) -> SVector(parse.(Float64, split(strip(line))[1:3])...)
+    return cell, n_atoms
+
+end
+
+# Just reads the positions and cell from POSCAR
+function read_poscar_positions(path; n_atoms = nothing,
+                                ssposcar_is_frac::Bool = true,
+                                store_frac_coords::Bool = false)
+
+                                
+    cell, n_atoms = read_poscar_cell(path; n_atoms = n_atoms)
 
     positions = zeros(SVector{3, Float64}, n_atoms)
 
@@ -169,29 +176,19 @@ function read_poscar_positions(path; n_atoms = nothing,
 
 end
 
-function read_poscar_positions!(positions::AbstractVector{SVector{D, T}}, path;
+function read_poscar_positions!(positions::Vector{SVector{3,T}}, path;
                                 n_atoms = nothing, 
                                 ssposcar_is_frac::Bool = true,
-                                store_frac_coords::Bool = false) where {T,D}
+                                store_frac_coords::Bool = false) where T
 
-    cell = zeros(Float64, 3, 3)
-
-    open(path, "r") do f
-        readline(f)
-        scale = parse(Float64, readline(f))
-        lv1 = scale .* parse.(Float64, split(strip(readline(f))))
-        lv2 = scale .* parse.(Float64, split(strip(readline(f))))
-        lv3 = scale .* parse.(Float64, split(strip(readline(f))))
-
-        cell .= hcat(lv1, lv2, lv3) # cell vecs as columns
-    end
+    cell, n_atoms = read_poscar_cell(path; n_atoms = n_atoms)
 
     convert_to_cart = (!store_frac_coords && ssposcar_is_frac)
 
     if convert_to_cart
-        parse_line = (line) -> SVector(cell * parse.(T, split(strip(line))[1:D])...)
+        parse_line = (line) -> SVector(cell * parse.(T, split(strip(line))[1:3])...)
     else
-        parse_line = (line) -> SVector(parse.(T, split(strip(line))[1:D])...)
+        parse_line = (line) -> SVector(parse.(T, split(strip(line))[1:3])...)
     end
 
     open(path, "r") do f
@@ -201,15 +198,49 @@ function read_poscar_positions!(positions::AbstractVector{SVector{D, T}}, path;
         readline(f)
         readline(f)
         readline(f) # skip species line
-
-        natoms_file = sum(parse.(Int, split(strip(readline(f)))))
-        if !isnothing(n_atoms) && natoms_file != n_atoms
-            error(ArgumentError("Poscar has $(natoms_file) but you told me it would have $(natoms)"))
-        end
-
+        readline(f) # natoms line
         readline(f) # skip "direct coordinates" line
-        for i in 1:natoms_file
+
+        for i in 1:n_atoms
             positions[i] = parse_line(readline(f))
+        end
+    end
+
+    return positions, cell
+
+end
+
+function read_poscar_positions!(positions::AbstractMatrix{T}, path;
+                                n_atoms = nothing, 
+                                ssposcar_is_frac::Bool = true,
+                                store_frac_coords::Bool = false) where T
+
+    if size(positions, 1) != 3
+        raise(ArgumentError("read_poscar_positions only supports 3D systems. Expected 3xN matrix."))
+    end
+
+    cell, n_atoms = read_poscar_cell(path; n_atoms = n_atoms)
+
+    convert_to_cart = (!store_frac_coords && ssposcar_is_frac)
+
+    if convert_to_cart
+        parse_line = (line) -> cell * parse.(T, split(strip(line))[1:3])
+    else
+        parse_line = (line) -> parse.(T, split(strip(line))[1:3])
+    end
+
+    open(path, "r") do f
+        readline(f)
+        readline(f)
+        readline(f)
+        readline(f)
+        readline(f)
+        readline(f) # skip species liner
+        readline(f) # atoms line
+        readline(f) # skip "direct coordinates" line
+
+        for i in 1:n_atoms
+            positions[:,i] = parse_line(readline(f))
         end
     end
 
