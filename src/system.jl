@@ -36,6 +36,8 @@ function TDEPSystem(ssposcar_path::String;
     syms = reduce(vcat, [fill(s, c) for (s, c) in zip(symbols, counts)])
     m = [periodic_table[s].atomic_mass for s in syms]
 
+    syms = AtomsBase.ChemicalSpecies.(syms)
+
     c = (SVector(cell_vec[1:3, 1]...),
             SVector(cell_vec[1:3, 2]...),
             SVector(cell_vec[1:3, 3]...)
@@ -101,6 +103,9 @@ AtomsBase.mass(sys::TDEPSystem, i::Union{Integer, AbstractVector}) = sys.mass[i]
 
 AtomsBase.species(s::TDEPSystem, ::Colon) = s.species
 AtomsBase.species(sys::TDEPSystem, i::Union{Integer, AbstractVector}) = sys.species[i]
+
+AtomsBase.atomic_symbol(s::TDEPSystem, ::Colon) = Symbol.(s.species)
+AtomsBase.atomic_number(s::TDEPSystem, ::Colon) = atomic_number.(s.species)
 
 function Base.show(io::IO, sys::TDEPSystem)
     print(io, sys.print_str)
