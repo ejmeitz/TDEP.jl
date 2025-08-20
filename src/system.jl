@@ -52,6 +52,17 @@ function TDEPSystem(ssposcar_path::String;
 
 end
 
+# Just trust the user knows what they're doing
+function TDEPSystem(sys::TDEPSystem{T,L,M,S}, new_positions::Vector{SVector{3, L}}) where {T,L,M,S}
+    return TDEPSystem(
+        sys.cell,
+        new_posns,
+        sys.species,
+        sys.mass,
+        sys.print_str
+    )
+end
+
 Base.length(sys::TDEPSystem)         = length(sys.position)
 Base.size(sys::TDEPSystem)           = size(sys.position)
 
