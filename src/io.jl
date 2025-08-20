@@ -133,12 +133,22 @@ function write_ssposcar(outdir::String, cell_vectors::AbstractMatrix{L},
 end
 
 # Just reads the positions and cell from POSCAR
-function read_poscar_positions(path; n_atoms = nothing)
+function read_poscar_positions(path; n_atoms = nothing,
+                                ssposcar_is_frac::Bool = true,
+                                store_frac_coords::Bool = false)
 
     parse_line = (line) -> SVector(parse.(Float64, split(strip(line))[1:3])...)
 
     positions = SVector{3, Float64}[]
     cell = zeros(Float64, 3, 3)
+
+    convert_to_cart = (!store_frac_coords && ssposcar_is_frac)
+
+    if convert_to_cart
+        parse_line = (line) -> SVector(cell_vec * parse.(T, split(strip(line))[1:D])...)
+    else
+        parse_line = (line) -> SVector(parse.(T, split(strip(line))[1:D])...)
+    end
 
     open(path, "r") do f
         readline(f)
@@ -167,9 +177,19 @@ function read_poscar_positions(path; n_atoms = nothing)
 
 end
 
-function read_poscar_positions!(positions, path; n_atoms = nothing)
+function read_poscar_positions!(positions::AbstractVector{SVector{T, D}}, path;
+                                n_atoms = nothing, 
+                                ssposcar_is_frac::Bool = true,
+                                store_frac_coords::Bool = false) where {T,D}
 
-    parse_line = (line) -> SVector(parse.(Float64, split(strip(line))[1:3])...)
+    convert_to_cart = (!store_frac_coords && ssposcar_is_frac)
+
+    if convert_to_cart
+        parse_line = (line) -> SVector(cell_vec * parse.(T, split(strip(line))[1:D])...)
+    else
+        parse_line = (line) -> SVector(parse.(T, split(strip(line))[1:D])...)
+    end
+
 
     cell = zeros(Float64, 3, 3)
 

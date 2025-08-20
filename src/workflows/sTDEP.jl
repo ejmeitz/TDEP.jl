@@ -135,10 +135,8 @@ function generate_configs(sys::AbstractSystem{3}, cc::CanonicalConfiguration,
     p = Progress(cc.nconf, desc = "Calculating Forces")
     for i in 1:cc.nconf
         filepath = get_filepath(i)
-        x_frac, cell_vec = read_poscar_positions(filepath, n_atoms = length(sys))
+        x_cart, cell_vec = read_poscar_positions(filepath, n_atoms = length(sys))
         cell_vec = cell_vec * u"Å"
-
-        x_cart = [SVector((cell_vec*xf)...) for xf in x_frac]
        
         # Construct AtomsBase.FastSystem object with new positions
         #* CURRENTLY WILL BREAK FOR LJ w/ Molly + MISSING VELOCITIES

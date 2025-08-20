@@ -23,16 +23,10 @@ function TDEPSystem(ssposcar_path::String;
                     ssposcar_is_frac::Bool = true,
                     store_frac_coords::Bool = false)
 
-    x_ss, cell_vec = read_poscar_positions(ssposcar_path)
+    posns, cell_vec = read_poscar_positions(ssposcar_path; 
+                                            store_frac_coords = store_frac_coords,
+                                            ssposcar_is_frac = ssposcar_is_frac)
     cell_vec = cell_vec * u"Å"
-
-    convert_to_cart = (!store_frac_coords && ssposcar_is_frac)
-
-    if convert_to_cart
-        posns = [SVector((cell_vec*xf)...) for xf in x_ss]
-    else
-        posns = [SVector(x...) for x in x_ss]
-    end
 
     symbols, counts = read_poscar_symbol_block(ssposcar_path)
     str = join(["$(c) $(string(s)) atoms" for (s, c) in zip(symbols, counts)])
