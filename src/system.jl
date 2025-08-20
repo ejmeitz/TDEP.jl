@@ -56,7 +56,7 @@ end
 function TDEPSystem(sys::TDEPSystem{T,L,M,S}, new_positions::Vector{SVector{3, L}}) where {T,L,M,S}
     return TDEPSystem(
         sys.cell,
-        new_posns,
+        new_positions,
         sys.species,
         sys.mass,
         sys.print_str
