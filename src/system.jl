@@ -27,6 +27,7 @@ function TDEPSystem(ssposcar_path::String;
                                             store_frac_coords = store_frac_coords,
                                             ssposcar_is_frac = ssposcar_is_frac)
     cell_vec = cell_vec * u"Å"
+    posns = posns * u"Å"
 
     symbols, counts = read_poscar_symbol_block(ssposcar_path)
     str = join(["$(c) $(string(s)) atoms" for (s, c) in zip(symbols, counts)])
