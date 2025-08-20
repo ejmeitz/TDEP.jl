@@ -154,6 +154,7 @@ function read_poscar_positions(path; n_atoms = nothing,
         if !isnothing(n_atoms) && natoms_file != n_atoms
             error(ArgumentError("Poscar has $(natoms_file) but you told me it would have $(natoms)"))
         end
+        n_atoms = natoms_file
 
     end
 
