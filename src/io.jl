@@ -168,7 +168,7 @@ function read_poscar_positions(path; n_atoms = nothing,
 
 end
 
-function read_poscar_positions!(positions::AbstractVector{SVector{T, D}}, path;
+function read_poscar_positions!(positions::AbstractVector{SVector{D, T}}, path;
                                 n_atoms = nothing, 
                                 ssposcar_is_frac::Bool = true,
                                 store_frac_coords::Bool = false) where {T,D}
@@ -205,7 +205,7 @@ function read_poscar_positions!(positions::AbstractVector{SVector{T, D}}, path;
         if !isnothing(n_atoms) && natoms_file != n_atoms
             error(ArgumentError("Poscar has $(natoms_file) but you told me it would have $(natoms)"))
         end
-        
+
         readline(f) # skip "direct coordinates" line
         for i in 1:natoms_file
             positions[i] = parse_line(readline(f))
