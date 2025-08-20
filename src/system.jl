@@ -105,7 +105,11 @@ AtomsBase.species(s::TDEPSystem, ::Colon) = s.species
 AtomsBase.species(sys::TDEPSystem, i::Union{Integer, AbstractVector}) = sys.species[i]
 
 AtomsBase.atomic_symbol(s::TDEPSystem, ::Colon) = Symbol.(s.species)
+AtomsBase.atomic_symbol(s::TDEPSystem, i::Union{Integer, AbstractVector}) = Symbol(s.species[i])
+
 AtomsBase.atomic_number(s::TDEPSystem, ::Colon) = atomic_number.(s.species)
+AtomsBase.atomic_number(s::TDEPSystem, i::Union{Integer, AbstractVector}) = atomic_number(s.species[i])
+
 
 function Base.show(io::IO, sys::TDEPSystem)
     print(io, sys.print_str)
