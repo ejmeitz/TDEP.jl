@@ -53,7 +53,7 @@ function TDEP.LAMMPSCalculator(
         types = [Int32(label_type_map[sym]) for sym in all_syms]
     end
 
-    m_lmp = Dict(label_type_map[sym] => sys.mass[i] for (sym, i) in unique_sym_idxs)
+    m_lmp = Dict(label_type_map[sym] => ustrip(sys.mass[i]) for (sym, i) in unique_sym_idxs)
 
     label_map_cmd = "labelmap atom " * join(["$(i) $(sym)" for (sym,i) in label_type_map], " ") 
 
