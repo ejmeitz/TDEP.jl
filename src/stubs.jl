@@ -56,3 +56,6 @@ mutable struct LAMMPSCalculator{T}
     lmp::T # T will be LMP but that is not available here
     last_updated::Int
 end
+
+
+function single_point_potential_energy end

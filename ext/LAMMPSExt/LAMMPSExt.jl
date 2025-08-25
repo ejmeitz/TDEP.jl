@@ -6,8 +6,6 @@ using Unitful
 import AtomsBase
 import LinearAlgebra
 
-export single_point_potential_energy
-
 # Modified from the Molly LAMMPS Calculator which I implemented
 # this lets me remove some things and also not have to depend on Molly
 
@@ -104,7 +102,7 @@ function TDEP.LAMMPSCalculator(
 end
 
 # Expect Vector of Vectors or 3 x N Matrix
-function single_point_potential_energy(r::AbstractVecOrMat, inter::LAMMPSCalculator)
+function TDEP.single_point_potential_energy(r::AbstractVecOrMat, inter::LAMMPSCalculator)
     scatter!(lammps_calc.lmp, "x", reinterpret(reshape, Float64, r))
     command(lammps_calc.lmp, "run 0 pre no post no")
     return extract_compute(inter.lmp, "pot_e", STYLE_GLOBAL, TYPE_SCALAR)[1] * u"eV"
