@@ -59,7 +59,7 @@ function TDEP.LAMMPSCalculator(
 
     setup_cmd = """
             log $(logfile_path)
-            units $(lammps_unit_system)
+            units metal
             atom_style atomic
             atom_modify map array sort 0 0
         """
