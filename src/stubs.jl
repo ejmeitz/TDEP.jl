@@ -1,4 +1,4 @@
-export generate_MDTDEP_dataset, NVT, TI
+export generate_MDTDEP_dataset, NVT, TI, LAMMPSCalculator
 
 
 # This file contains function handles which are implemented
@@ -36,7 +36,7 @@ Restrictions:
 -------------
 - CPU only
 - Floats promote to Float64
-- No TriclinicBoundary
+- No triclinic boundary
 - 3D systems only
 - Fully periodic systems only
 

@@ -100,7 +100,7 @@ function TDEP.LAMMPSCalculator(
     # and build the neighbor list. 
     command(lmp, "run 0 post no")
 
-    return LAMMPSCalculator{typeof(lmp)}(lmp, -1)
+    return TDEP.LAMMPSCalculator{typeof(lmp)}(lmp, -1)
 end
 
 # Expect Vector of Vectors or 3 x N Matrix

@@ -66,10 +66,10 @@ function TDEPSystem(sys::TDEPSystem{T,L,M,S}, new_positions::Vector{SVector{3, L
     )
 end
 
-Base.length(sys::TDEPSystem)         = length(sys.position)
-Base.size(sys::TDEPSystem)           = size(sys.position)
+Base.length(sys::TDEPSystem) = length(sys.position)
+Base.size(sys::TDEPSystem) = size(sys.position)
 
-Base.getindex(sys::TDEPSystem, i::Integer)  = AtomView(sys, i)
+Base.getindex(sys::TDEPSystem, i::Integer) = AtomView(sys, i)
 
 # System property access
 function Base.getindex(system::TDEPSystem, x::Symbol)
