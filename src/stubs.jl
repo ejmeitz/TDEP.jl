@@ -52,9 +52,7 @@ Arguments:
     difficult. By providing this dictionary you can overide the type label assigned to each unique species. 
 - `logfile_path::String = "none"` : Path where LAMMPS logfile is written. Defaults to no log file. 
 """
-mutable struct LAMMPSCalculator{T, E, L}
+mutable struct LAMMPSCalculator{T}
     lmp::T # T will be LMP but that is not available here
     last_updated::Int
-    energy_unit::E
-    length_unit::L
 end
