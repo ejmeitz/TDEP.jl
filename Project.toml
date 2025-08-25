@@ -21,9 +21,11 @@ Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 
 [weakdeps]
 Molly = "aa0f7f06-fcc0-5ec4-a7f3-a573f33f9c4c"
+LAMMPS = "ee2e13b9-eee9-4449-aafa-cfa6a2dbe14d"
 
 [extensions]
 MolecularDynamicsExt = "Molly"
+LAMMPSExt = "LAMMPS"
 
 [compat]
 AtomsBase = "0.5.1"
@@ -33,6 +35,7 @@ FastGaussQuadrature = "1.0.2"
 LinearAlgebra = "1.11.0"
 MPI = "0.20.22"
 Molly = "0.22"
+LAMMPS = "0.9"
 PeriodicTable = "1.2.1"
 Printf = "1.11.0"
 ProgressMeter = "1.10.4"
