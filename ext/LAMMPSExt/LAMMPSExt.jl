@@ -4,6 +4,7 @@ using LAMMPS
 using TDEP
 using Unitful
 import AtomsBase
+import AtomsCalculators
 import LinearAlgebra
 
 # Modified from the Molly LAMMPS Calculator which I implemented
@@ -100,6 +101,15 @@ function TDEP.LAMMPSCalculator(
 
     return TDEP.LAMMPSCalculator{typeof(lmp)}(lmp, -1)
 end
+
+AtomsCalculators.energy_unit(inter::LAMMPSCalculator) = "eV"
+
+function AtomsCalculators.potential_energy(sys::TDEPSystem, inter::LAMMPSCalculator; kwargs...)
+    scatter!(lammps_calc.lmp, "x", reinterpret(reshape, Float64, sys.position))
+    command(lammps_calc.lmp, "run 0 pre no post no")
+    return extract_compute(inter.lmp, "pot_e", STYLE_GLOBAL, TYPE_SCALAR)[1] * u"eV"
+end
+
 
 # Expect Vector of Vectors or 3 x N Matrix
 function TDEP.single_point_potential_energy(r::AbstractVecOrMat, inter::LAMMPSCalculator)
