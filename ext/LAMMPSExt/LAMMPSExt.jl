@@ -102,7 +102,7 @@ function TDEP.LAMMPSCalculator(
     return TDEP.LAMMPSCalculator{typeof(lmp)}(lmp, -1)
 end
 
-AtomsCalculators.energy_unit(inter::LAMMPSCalculator) = "eV"
+AtomsCalculators.energy_unit(inter::LAMMPSCalculator) = u"eV"
 
 function AtomsCalculators.potential_energy(sys::TDEPSystem, inter::LAMMPSCalculator; kwargs...)
     scatter!(inter.lmp, "x", reinterpret(reshape, Float64, sys.position))
