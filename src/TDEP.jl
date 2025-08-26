@@ -19,6 +19,10 @@ using AtomsCalculators
 using Reexport 
 @reexport using Unitful
 
+@static if !TDEP_jll.is_available()
+    @warn "Could not load TDEP binaries on this platform. Try Linux or MacOs."
+end
+
 
 const DefaultFloat = Float64
 const periodic_table = PeriodicTable.elements

@@ -58,13 +58,13 @@ Base.@kwdef struct PhononDispersionRelations{T} <: TDEP_Command{T}
     dos::Bool = false
     qpoint_grid::NTuple{3,Int} = (26, 26, 26)
     meshtype::Int = 1
-    sigma::T = 1.0
+    sigma::Float64 = 1.0
     readqmesh::Bool = false
     integrationtype::Int = 2
     dospoints::Int = 400
     gruneisen::Bool = false
     dumpgrid::Bool = false
-    temperature::T = -1.0
+    temperature::Float64 = -1.0
 end
 
 cmd_name(::PhononDispersionRelations) = "phonon_dispersion_relations"
