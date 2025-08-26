@@ -42,6 +42,9 @@ export PhononDispersionRelations
   Use third-order force constants to calculate mode Grüneisen parameters.  
 - `dumpgrid::Bool = false`  
   Write files with q-vectors, frequencies, eigenvectors, and group velocities for a grid.
+- `temperature::T = -1`
+  If positive, write an `outfile.free_energy` file which has the vibrational free energy, 
+  entropy and heat capacity (always quantum) 
 
 # Description
 Calculate phonon dispersion relations and related quantities. By default, dispersion curves along a standard high-symmetry path are computed. Options allow calculation of mode Grüneisen parameters, projected phonon DOS, thermodynamic properties, or full data dumps.
@@ -61,6 +64,7 @@ Base.@kwdef struct PhononDispersionRelations{T} <: TDEP_Command{T}
     dospoints::Int = 400
     gruneisen::Bool = false
     dumpgrid::Bool = false
+    temperature::T = -1.0
 end
 
 cmd_name(::PhononDispersionRelations) = "phonon_dispersion_relations"
