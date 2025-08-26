@@ -1,11 +1,12 @@
 export PhononDispersionRelations
 
 """
-    PhononDispersionRelations(; unit, nq_on_path = 100, readpath = false,
+    PhononDispersionRelations(; unit = "thz", nq_on_path = 100, readpath = false,
                               dos = false, qpoint_grid, meshtype = 1,
                               sigma = 1.0, readqmesh = false,
                               integrationtype = 2, dospoints = 400,
-                              gruneisen = false, dumpgrid = false)
+                              gruneisen = false, dumpgrid = false,
+                              temperature = -1.0)
 
 # Arguments
 - `unit::String = "thz"`  
@@ -27,7 +28,7 @@ export PhononDispersionRelations
   2. FFT  
   3. Wedge-based mesh (approximate density)  
   4. Commensurate mesh of an approximately cubic supercell  
-- `sigma::T = 1.0`  
+- `sigma::Float64 = 1.0`  
   Global scaling factor for Gaussian/adaptive Gaussian smearing (baseline set procedurally).  
 - `readqmesh::Bool = false`  
   Read the q-point mesh from file (see `genkpoints` utility).  
@@ -42,7 +43,7 @@ export PhononDispersionRelations
   Use third-order force constants to calculate mode Grüneisen parameters.  
 - `dumpgrid::Bool = false`  
   Write files with q-vectors, frequencies, eigenvectors, and group velocities for a grid.
-- `temperature::T = -1`
+- `temperature::Float64 = -1`
   If positive, write an `outfile.free_energy` file which has the vibrational free energy, 
   entropy and heat capacity (always quantum) 
 
@@ -51,7 +52,7 @@ Calculate phonon dispersion relations and related quantities. By default, disper
 
 TDEP Documentation: https://tdep-developers.github.io/tdep/program/phonon_dispersion_relations/
 """
-Base.@kwdef struct PhononDispersionRelations{T} <: TDEP_Command{T}
+Base.@kwdef struct PhononDispersionRelations <: TDEP_Command{Float64}
     unit::String = "thz"
     nq_on_path::Int = 100
     readpath::Bool = false
