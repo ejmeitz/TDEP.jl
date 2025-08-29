@@ -9,7 +9,7 @@ export PackSimulation
 # Arguments
 - `stride::Int = 1`: Pack every Nth configuration instead of all.
 - `nrand::Int = -1`: Pack N random configurations instead of all.
-- `temperature::T = -1.0`: Override the simulation temperature.
+- `temperature::Float64 = -1.0`: Override the simulation temperature.
 - `variable_cell::Bool = false`: Store variable cell information.
 - `magnetic_moments::Bool = false`: Store projected magnetic moments.
 - `dielectric::Bool = false`: Store dielectric constant and Born charges.
@@ -21,10 +21,10 @@ Utility to pack a simulation into HDF5 format with optional subsampling, random 
 
 TDEP Documentation: https://tdep-developers.github.io/tdep/program/pack_simulation/
 """
-Base.@kwdef struct PackSimulation{T} <: TDEP_Command{T}
+Base.@kwdef struct PackSimulation <: TDEP_Command
     stride::Int = 1
     nrand::Int = -1
-    temperature::T = -1.0
+    temperature::Float64 = -1.0
     variable_cell::Bool = false
     magnetic_moments::Bool = false
     dielectric::Bool = false

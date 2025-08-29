@@ -14,13 +14,13 @@ export ThermalConductivity2023
   1. Gaussian  
   2. Adaptive Gaussian  
   3. Tetrahedron
-- `sigma::T = 1.0`: Global scaling factor for adaptive Gaussian smearing.
-- `threshold::T = 4.0`: Number of standard deviations beyond which the Gaussian is considered zero.
+- `sigma::Float64 = 1.0`: Global scaling factor for adaptive Gaussian smearing.
+- `threshold::Float64 = 4.0`: Number of standard deviations beyond which the Gaussian is considered zero.
 - `readqmesh::Bool = false`: Read the q-point mesh from file (see `genkpoints` utility).
-- `temperature::T = -1.0`: Evaluate thermal conductivity at a single temperature.
+- `temperature::Float64 = -1.0`: Evaluate thermal conductivity at a single temperature.
 - `temperature_range::NTuple{3,T} = (100, 300, 5)`: Series of temperatures (min, max, number of points).
 - `logtempaxis::Bool = false`: Space temperature points logarithmically instead of linearly.
-- `max_mfp::T = -1.0`: Limit the phonon mean free path (approximate domain size).
+- `max_mfp::Float64 = -1.0`: Limit the phonon mean free path (approximate domain size).
 - `dumpgrid::Bool = false`: Write files with q-vectors, frequencies, eigenvectors, and group velocities for a grid.
 - `noisotope::Bool = false`: Do not consider isotope scattering.
 
@@ -31,17 +31,17 @@ Calculates lattice thermal conductivity via the iterative solution of the phonon
 
 TDEP Documentation: https://tdep-developers.github.io/tdep/program/thermal_conductivity_2023/
 """
-Base.@kwdef struct ThermalConductivity2023{T} <: TDEP_Command{T}
+Base.@kwdef struct ThermalConductivity2023 <: TDEP_Command
     readiso::Bool = false
     qpoint_grid::NTuple{3,Int} = (26, 26, 26)
     integrationtype::Int = 2
-    sigma::T = 1.0
-    threshold::T = 4.0
+    sigma::Float64 = 1.0
+    threshold::Float64 = 4.0
     readqmesh::Bool = false
-    temperature::T = -1.0
-    temperature_range::NTuple{3,T} = (100, 300, 5)
+    temperature::Float64 = -1.0
+    temperature_range::NTuple{3,Float64} = (100, 300, 5)
     logtempaxis::Bool = false
-    max_mfp::T = -1.0
+    max_mfp::Float64 = -1.0
     dumpgrid::Bool = false
     noisotope::Bool = false
 end

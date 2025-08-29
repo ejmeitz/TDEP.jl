@@ -106,7 +106,7 @@ AtomsCalculators.energy_unit(inter::LAMMPSCalculator) = u"eV"
 
 function AtomsCalculators.potential_energy(sys::TDEPSystem, inter::LAMMPSCalculator; kwargs...)
     scatter!(inter.lmp, "x", reinterpret(reshape, Float64, sys.position))
-    command(inter.lmp, "run 0 pre no post no")
+    command(inter.lmp, "run 0 post no") #* builds new neighborlist kinda slow..
     return extract_compute(inter.lmp, "pot_e", STYLE_GLOBAL, TYPE_SCALAR)[1] * u"eV"
 end
 
@@ -114,7 +114,7 @@ end
 # Expect Vector of Vectors or 3 x N Matrix
 function TDEP.single_point_potential_energy(r::AbstractVecOrMat, inter::LAMMPSCalculator)
     scatter!(inter.lmp, "x", reinterpret(reshape, Float64, r))
-    command(inter.lmp, "run 0 pre no post no")
+    command(inter.lmp, "run 0 post no") #* builds new neighborlist kinda slow..
     return extract_compute(inter.lmp, "pot_e", STYLE_GLOBAL, TYPE_SCALAR)[1] * u"eV"
 end
 

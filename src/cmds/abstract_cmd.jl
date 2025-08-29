@@ -6,7 +6,7 @@ Base type for TDEP commands. All classes which inhert from `TDEP_Command`
 implement `cmd_name` and other helper functions necessary to check 
 required input files and parse output files.
 """
-abstract type TDEP_Command{T} end
+abstract type TDEP_Command end
 
 # BinaryBuilder creates Julia functions for each 
 # ExecutableProduct. This function gets that handle and

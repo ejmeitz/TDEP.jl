@@ -5,14 +5,14 @@ export CanonicalConfiguration
                             mindist = -1, debye_temperature = -1.0, maximum_frequency = -1.0)
 
 # Arguments 
-- `temperature::T`: Temperature to emulate in Kelvin.
+- `temperature::Float64`: Temperature to emulate in Kelvin.
 - `nconf::Int`: Number of configurations to generate.
 - `quantum::Bool = false` : Use Bose-Einstein statistics instead of Maxwell-Boltzmann.
 - `output_format::Int = 1`: (1) VASP (2) Abinit (4) FHI-Aims (5) Siesta
-- `mindist::T = -1`: Smallest distance between two atoms allowed, in units of the nearest neighbour distance.
-- `debye_temperature::T = -1.0`: Generate forceconstants that match a Debye temperature,
+- `mindist::Float64 = -1`: Smallest distance between two atoms allowed, in units of the nearest neighbour distance.
+- `debye_temperature::Float64 = -1.0`: Generate forceconstants that match a Debye temperature,
                                  and build displacements according to these. 
-- `maximum_frequency::T = -1.0`: Generate forceconstants that match a maximum frequency (in THz),
+- `maximum_frequency::Float64 = -1.0`: Generate forceconstants that match a maximum frequency (in THz),
                                  and build displacements according to these.
 
 # Description
@@ -24,14 +24,14 @@ or as the starting point for molecular dynamics.
 
 TDEP Documentatoin: https://tdep-developers.github.io/tdep/program/canonical_configuration/
 """
-Base.@kwdef struct CanonicalConfiguration{T} <: TDEP_Command{T}
-    temperature::T
+Base.@kwdef struct CanonicalConfiguration <: TDEP_Command
+    temperature::Float64
     nconf::Int
     quantum::Bool = false
     output_format::Int = 1
-    mindist::T = -1.0
-    debye_temperature::T = -1.0
-    maximum_frequency::T = -1.0
+    mindist::Float64 = -1.0
+    debye_temperature::Float64 = -1.0
+    maximum_frequency::Float64 = -1.0
 end
 
 cmd_name(::CanonicalConfiguration) = "canonical_configuration"

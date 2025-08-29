@@ -17,7 +17,7 @@ Utility to extract TDEP dynamical matrices in formats readable by other codes (c
 
 TDEP Documentation: https://tdep-developers.github.io/tdep/program/dump_dynamical_matrices/
 """
-Base.@kwdef struct DumpDynamicalMatrices <: TDEP_Command{Nothing}
+Base.@kwdef struct DumpDynamicalMatrices <: TDEP_Command
     qpoint_grid::NTuple{3,Int} = (26, 26, 26)
     meshtype::Int = 1
     readqpoints::Bool = false

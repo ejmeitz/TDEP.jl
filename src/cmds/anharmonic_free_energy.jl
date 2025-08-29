@@ -29,12 +29,12 @@ Compute phonon free energy including anharmonic contributions over a specified t
 
 TDEP Documentation: https://tdep-developers.github.io/tdep/program/anharmonic_free_energy/
 """
-Base.@kwdef struct AnharmonicFreeEnergy{T} <: TDEP_Command{T}
-    temperature::T = 300.0
+Base.@kwdef struct AnharmonicFreeEnergy <: TDEP_Command
+    temperature::Float64 = 300.0
     qpoint_grid::NTuple{3,Int} = (26, 26, 26)
     integrationtype::Int = 2
-    sigma::T = 1.0
-    temperature_range::NTuple{3,T} = (-1.0, -1.0, -1.0)
+    sigma::Float64 = 1.0
+    temperature_range::NTuple{3,Float64} = (-1.0, -1.0, -1.0)
     readiso::Bool = false
     meshtype::Int = 1
     readqmesh::Bool = false

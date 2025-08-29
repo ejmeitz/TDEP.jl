@@ -16,7 +16,7 @@ export Lineshape
   - `"thz"` = terahertz (frequency)  
   - `"icm"` = inverse cm  
   - `"mev"` = meV  
-- `temperature::T = 300.0`  
+- `temperature::Float64 = 300.0`  
   Temperature for occupation numbers (should match force-constant determination temperature).  
 - `n_energies::Int = 1200`  
   Number of energy points for the self-energy calculation.  
@@ -34,7 +34,7 @@ export Lineshape
   3. Tetrahedron  
   4. …  
   5. …  
-- `sigma::T = 1.0`  
+- `sigma::Float64 = 1.0`  
   Global scaling factor for Gaussian/adaptive Gaussian smearing.  
 - `path::Bool = false`  
   Calculate self-energy and spectral function along a high-symmetry path.  
@@ -46,7 +46,7 @@ export Lineshape
   Single q-point (fractional coordinates) for self-energy calculation.  
 - `highsymmetrypoint::String = ""`  
   Label of a high-symmetry point (e.g. `"X"`, `"L"`) instead of explicit `qpoint`.  
-- `max_energy::T = 1.4`  
+- `max_energy::Float64 = 1.4`  
   Maximum energy cutoff (in multiples of max harmonic frequency).  
 - `no_isotope_scattering::Bool = false`  
   Disable isotope (mass-disorder) scattering.  
@@ -66,23 +66,23 @@ Calculate frequency-dependent phonon self-energy and spectral function, either a
 
 TDEP Documentation: https://tdep-developers.github.io/tdep/program/lineshape/
 """
-Base.@kwdef struct Lineshape{T} <: TDEP_Command{T}
+Base.@kwdef struct Lineshape <: TDEP_Command
     unit::String = "thz"
-    temperature::T = 300.0
+    temperature::Float64 = 300.0
     n_energies::Int = 1200
     qpoint_grid::NTuple{3,Int} = (26, 26, 26)
     meshtype::Int = 2
     integrationtype::Int = 2
-    sigma::T = 1.0
+    sigma::Float64 = 1.0
     path::Bool = false
     readpath::Bool = false
     nq_on_path::Int = 100
-    qpoint::NTuple{3,T} = (0.0, 0.0, 0.0)
+    qpoint::NTuple{3,Float64} = (0.0, 0.0, 0.0)
     highsymmetrypoint::String = ""
-    max_energy::T = 1.4
+    max_energy::Float64 = 1.4
     no_isotope_scattering::Bool = false
     no_thirdorder_scattering::Bool = false
-    qdirin::NTuple{3,T} = (1.0, 0.0, 0.0)
+    qdirin::NTuple{3,Float64} = (1.0, 0.0, 0.0)
     grid::Bool = false
     readiso::Bool = false
     readqmesh::Bool = false

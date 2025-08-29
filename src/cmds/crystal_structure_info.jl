@@ -11,7 +11,7 @@ Diagnostic tool to verify symmetry heuristics: prints the identified Bravais lat
 
 TDEP Documentation: https://tdep-developers.github.io/tdep/program/crystal_structure_info/
 """
-Base.@kwdef struct CrystalStructureInfo <: TDEP_Command{Nothing}
+Base.@kwdef struct CrystalStructureInfo <: TDEP_Command
     printsymmetry::Bool = false
 end
 

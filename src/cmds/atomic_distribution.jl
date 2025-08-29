@@ -4,7 +4,7 @@ export AtomicDistribution
     AtomicDistribution(; cutoff = 8.0, stride = 1)
 
 # Arguments
-- `cutoff::T = 8.0`: Consider atomic pairs up to this distance (Å).
+- `cutoff::Float64 = 8.0`: Consider atomic pairs up to this distance (Å).
 - `stride::Int = 1`: Use every Nth configuration instead of all.
 
 # Description
@@ -12,8 +12,8 @@ Calculates properties of the atomic distribution from molecular dynamics—mean-
 
 TDEP Documentation: https://tdep-developers.github.io/tdep/program/atomic_distribution/
 """
-Base.@kwdef struct AtomicDistribution{T} <: TDEP_Command{T}
-    cutoff::T = 8.0
+Base.@kwdef struct AtomicDistribution <: TDEP_Command
+    cutoff::Float64 = 8.0
     stride::Int = 1
 end
 

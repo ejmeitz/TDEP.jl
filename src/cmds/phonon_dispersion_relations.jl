@@ -52,7 +52,7 @@ Calculate phonon dispersion relations and related quantities. By default, disper
 
 TDEP Documentation: https://tdep-developers.github.io/tdep/program/phonon_dispersion_relations/
 """
-Base.@kwdef struct PhononDispersionRelations <: TDEP_Command{Float64}
+Base.@kwdef struct PhononDispersionRelations <: TDEP_Command
     unit::String = "thz"
     nq_on_path::Int = 100
     readpath::Bool = false

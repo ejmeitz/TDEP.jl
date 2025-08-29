@@ -19,7 +19,7 @@ Builds supercells (both diagonal and non-diagonal) and can find the optimal supe
 
 TDEP Documentation: https://tdep-developers.github.io/tdep/program/generate_structure/
 """
-Base.@kwdef struct GenerateStructure <: TDEP_Command{Nothing}
+Base.@kwdef struct GenerateStructure <: TDEP_Command
     dimensions::NTuple{3,Int} = (5, 5, 5)
     nondiagonal_dimensions::NTuple{9,Int} = (0, 0, 0, 0, 0, 0, 0, 0, 0)
     output_format::Int = 1

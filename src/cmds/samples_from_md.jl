@@ -16,7 +16,7 @@ Selects approximately uncorrelated, evenly spaced samples from a molecular dynam
 
 TDEP Documentation: https://tdep-developers.github.io/tdep/program/samples_from_md/
 """
-Base.@kwdef struct SamplesFromMD <: TDEP_Command{Nothing}
+Base.@kwdef struct SamplesFromMD <: TDEP_Command
     nsamples::Int = 50
     output_format::Int = 1
 end
